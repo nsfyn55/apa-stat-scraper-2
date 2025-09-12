@@ -38,7 +38,7 @@ A powerful CLI application for extracting player statistics from the APA (Americ
 - **💾 Data Export**: Export statistics to CSV and JSON formats (coming soon)
 - **📈 Analytics Ready**: Structured data perfect for analysis and visualization
 - **🔒 LSB Compliant**: Follows Linux Standard Base standards for configuration and state
-- **🐍 Virtual Environment**: Isolated Python environment with pyenv
+- **🐍 Virtual Environment**: Isolated Python environment using venv
 
 ## Quick Start
 
@@ -48,8 +48,8 @@ git clone <repository-url>
 cd apa-stat-scraper-2
 
 # Setup virtual environment
-pyenv virtualenv 3.13.6 apa-stat-scraper-2
-pyenv local apa-stat-scraper-2
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 # Install dependencies
 pip install -r requirements.txt
@@ -66,17 +66,20 @@ python app.py verify-session
 
 ### Prerequisites
 - Python 3.13.6 (recommended)
-- pyenv (for Python version management)
 
 ### Setup
 
 1. **Create and activate virtual environment:**
 ```bash
 # Create virtual environment
-pyenv virtualenv 3.13.6 apa-stat-scraper-2
+python -m venv venv
 
-# Set local Python version for this project
-pyenv local apa-stat-scraper-2
+# Activate virtual environment
+# On macOS/Linux:
+source venv/bin/activate
+
+# On Windows:
+venv\Scripts\activate
 
 # Verify Python version
 python --version
@@ -285,33 +288,35 @@ Edit `etc/apa-stat-scraper-2/config.json` to customize:
 
 ## Virtual Environment Management
 
-This project uses pyenv for Python version management and virtual environments:
+This project uses Python's built-in `venv` module for virtual environment management:
 
 ### Commands
 ```bash
-# Check current Python version
-python --version
+# Create virtual environment
+python -m venv venv
 
-# List available Python versions
-pyenv versions
+# Activate virtual environment
+# On macOS/Linux:
+source venv/bin/activate
 
-# List virtual environments
-pyenv virtualenvs
-
-# Activate virtual environment (if not using pyenv local)
-pyenv activate apa-stat-scraper-2
+# On Windows:
+venv\Scripts\activate
 
 # Deactivate virtual environment
-pyenv deactivate
+deactivate
+
+# Check if virtual environment is active
+which python  # Should show path to venv/bin/python
 
 # Remove virtual environment (if needed)
-pyenv virtualenv-delete apa-stat-scraper-2
+rm -rf venv  # On macOS/Linux
+rmdir /s venv  # On Windows
 ```
 
 ### Project Structure
-- `.python-version` file automatically sets the Python version for this project
-- Virtual environment: `apa-stat-scraper-2` (Python 3.13.6)
+- Virtual environment directory: `venv/` (created locally)
 - Dependencies isolated from system Python
+- Cross-platform compatibility (macOS, Linux, Windows)
 
 ## Development
 
@@ -356,6 +361,17 @@ ls -la var/apa-stat-scraper-2/browser_data/
 # Reset configuration to defaults
 rm etc/apa-stat-scraper-2/config.json
 python app.py verify-session  # This will recreate default config
+```
+
+#### Virtual Environment Issues
+```bash
+# Recreate virtual environment
+deactivate
+rm -rf venv
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install -r requirements.txt
+playwright install
 ```
 
 #### Logs
