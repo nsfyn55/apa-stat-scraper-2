@@ -8,6 +8,7 @@ import argparse
 import sys
 from actions.login import LoginAction
 from actions.verify_session import VerifySessionAction
+from actions.clear_state import ClearStateAction
 
 def main():
     """Main CLI entry point"""
@@ -18,6 +19,7 @@ def main():
 Examples:
   python app.py login                    # Login to APA site
   python app.py verify-session          # Verify current session
+  python app.py clear-state             # Clear browser state and data
         """
     )
     
@@ -57,6 +59,17 @@ Examples:
         help='Run browser in headless mode'
     )
     
+    # Clear state action
+    clear_parser = subparsers.add_parser(
+        'clear-state',
+        help='Clear browser state, logs, and cache'
+    )
+    clear_parser.add_argument(
+        '--confirm',
+        action='store_true',
+        help='Skip confirmation prompt'
+    )
+    
     args = parser.parse_args()
     
     try:
@@ -70,6 +83,9 @@ Examples:
         elif args.action == 'verify-session':
             action = VerifySessionAction()
             success = action.run(headless=args.headless)
+        elif args.action == 'clear-state':
+            action = ClearStateAction()
+            success = action.run(confirm=args.confirm)
         else:
             print(f"❌ Unknown action: {args.action}")
             return 1

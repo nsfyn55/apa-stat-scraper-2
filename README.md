@@ -127,6 +127,22 @@ python app.py verify-session
 python app.py verify-session --headless
 ```
 
+```bash
+# Clear state with confirmation prompt
+python app.py clear-state
+
+# Clear state without confirmation
+python app.py clear-state --confirm
+```
+
+```bash
+# Clear state with confirmation prompt
+python app.py clear-state
+
+# Clear state without confirmation
+python app.py clear-state --confirm
+``````
+
 #### Help
 Get help on available commands:
 ```bash
