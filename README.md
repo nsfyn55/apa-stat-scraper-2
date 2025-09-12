@@ -6,21 +6,22 @@ A powerful CLI application for extracting player statistics from the APA (Americ
 
 - [Features](#features)
 - [Quick Start](#quick-start)
-- [Installation](#installation)
-  - [Prerequisites](#prerequisites)
-  - [Setup](#setup)
-- [Actions](#actions)
-  - [Login](#login)
-  - [Verify Session](#verify-session)
-  - [Clear State](#clear-state)
 - [Usage](#usage)
-- [Capabilities](#capabilities)
-- [Project Structure](#project-structure)
-- [Configuration](#configuration)
-  - [Configuration Options](#configuration-options)
-  - [Configuration Categories](#configuration-categories)
-- [Virtual Environment Management](#virtual-environment-management)
+  - [Command Line Usage](#command-line-usage)
+  - [Actions](#actions)
+    - [Login](#login)
+    - [Verify Session](#verify-session)
+    - [Clear State](#clear-state)
 - [Development](#development)
+  - [Installation](#installation)
+    - [Prerequisites](#prerequisites)
+    - [Setup](#setup)
+  - [Project Structure](#project-structure)
+  - [Configuration](#configuration)
+    - [Configuration Options](#configuration-options)
+    - [Configuration Categories](#configuration-categories)
+  - [Virtual Environment Management](#virtual-environment-management)
+  - [Adding New Actions](#adding-new-actions)
 - [Troubleshooting](#troubleshooting)
 - [Future Roadmap](#future-roadmap)
 - [Contributing](#contributing)
@@ -60,12 +61,101 @@ python app.py login
 python app.py verify-session
 ```
 
-## Installation
+## Usage
 
-### Prerequisites
+### Command Line Usage
+
+```bash
+# Show all available actions
+python app.py --help
+
+# Get help for specific action
+python app.py <action> --help
+```
+
+### Actions
+
+### Login
+
+**Description**: Establishes an authenticated session with the APA website. This action handles the complete login flow including form submission, authorization page navigation, and notification dismissal.
+
+**Semantics**: 
+- Prompts for credentials if not provided via command line
+- Performs multi-step authentication (login → authorization → dashboard)
+- Automatically handles notification dialogues
+- Saves session data for future use
+- Returns success/failure status
+
+**Sample Commands**:
+```bash
+# Interactive login (will prompt for credentials)
+python app.py login
+
+# Login with credentials provided
+python app.py login --email your@email.com --password yourpassword
+
+# Login in headless mode (no browser window)
+python app.py login --headless
+
+# Get help for login action
+python app.py login --help
+```
+
+### Verify Session
+
+**Description**: Checks if the current session is valid and can access the APA dashboard. This action verifies authentication without requiring new credentials.
+
+**Semantics**:
+- Uses existing session data from previous login
+- Navigates to dashboard to verify access
+- Handles any notification dialogues
+- Reports session status and current page information
+- Returns success if authenticated, failure if not
+
+**Sample Commands**:
+```bash
+# Check session status
+python app.py verify-session
+
+# Check session in headless mode
+python app.py verify-session --headless
+
+# Get help for verify-session action
+python app.py verify-session --help
+```
+
+### Clear State
+
+**Description**: Clears all browser data, logs, cache, and temporary files. This action resets the application to a clean state, requiring re-authentication.
+
+**Semantics**:
+- Removes browser session data (cookies, cache, local storage)
+- Clears application logs and cache
+- Deletes temporary files
+- Recreates necessary directory structure
+- Requires confirmation unless --confirm flag is used
+- Returns success/failure status
+
+**Sample Commands**:
+```bash
+# Clear state with confirmation prompt
+python app.py clear-state
+
+# Clear state without confirmation
+python app.py clear-state --confirm
+
+# Get help for clear-state action
+python app.py clear-state --help
+```
+
+## Development
+
+### Installation
+
+#### Prerequisites
 - Python 3.13.6 (recommended)
 
-### Setup
+#### Setup
 
 1. **Create and activate virtual environment:**
 ```bash
@@ -98,12 +188,6 @@ playwright install
 python app.py --help
 ```
 
-
-# Help for specific action
-python app.py login --help
-python app.py verify-session --help
-```
-
 ### Sample Workflow
 
 ```bash
@@ -123,54 +207,7 @@ python app.py verify-session
 # python app.py export-stats --format csv --output team_stats.csv
 ```
 
-## Capabilities
-
-#### 🔐 **Authentication & Session Management**
-- **Persistent Login**: Once logged in, your session is saved and reused
-- **Automatic Re-authentication**: Handles session expiration gracefully
-- **Notification Handling**: Automatically dismisses APA notification popups
-- **Secure Storage**: Session data stored in LSB-compliant `var/` directory
-
-#### ⚡ **CLI Interface**
-- **Intuitive Commands**: Simple, memorable command structure
-- **Help System**: Comprehensive help for all commands and options
-- **Error Handling**: Clear error messages and troubleshooting guidance
-- **Progress Feedback**: Real-time status updates during operations
-
-#### 🔒 **LSB Compliance**
-- **Configuration Management**: Centralized config in `etc/apa-stat-scraper-2/`
-- **State Management**: All runtime data in `var/apa-stat-scraper-2/`
-- **Logging**: Professional logging with automatic rotation
-- **Clean Separation**: Code vs. state data properly separated
-
-#### 📊 **Team Statistics Extraction** (Coming Soon)
-```bash
-# Extract all team member statistics
-python app.py scrape-team --team-id 12345678
-
-# Extract with specific options
-python app.py scrape-team --team-id 12345678 --format json --output team_data.json
-```
-
-#### 💾 **Data Export** (Coming Soon)
-```bash
-# Export to CSV
-python app.py export-stats --format csv --output team_stats.csv
-
-# Export to JSON
-python app.py export-stats --format json --output team_stats.json
-
-# Export with custom fields
-python app.py export-stats --fields name,skill_level,win_percentage,matches_played
-```
-
-#### 📈 **Analytics Features** (Coming Soon)
-- **Player Performance Analysis**: Win rates, skill progression, match history
-- **Team Comparison**: Compare multiple teams side-by-side
-- **Season Tracking**: Track performance across different seasons
-- **Custom Reports**: Generate reports with specific metrics
-
-## Project Structure
+### Project Structure
 
 ```
 apa-stat-scraper-2/
@@ -198,7 +235,7 @@ apa-stat-scraper-2/
 └── README.md             # This file
 ```
 
-## Configuration
+### Configuration
 
 The application follows LSB (Linux Standard Base) standards for configuration and state management:
 
@@ -248,7 +285,7 @@ Edit `etc/apa-stat-scraper-2/config.json` to customize:
 - **Output settings**: format, timestamps, backups
 - **Logging settings**: level, file size, rotation
 
-## Virtual Environment Management
+### Virtual Environment Management
 
 This project uses Python's built-in `venv` module for virtual environment management:
 
@@ -280,7 +317,7 @@ rmdir /s venv  # On Windows
 - Dependencies isolated from system Python
 - Cross-platform compatibility (macOS, Linux, Windows)
 
-## Development
+### Adding New Actions
 
 The application follows a modular structure:
 - `app.py`: Main CLI entry point with argument parsing
@@ -391,90 +428,4 @@ For issues and questions:
 2. Review the logs in `var/apa-stat-scraper-2/logs/`
 3. Check the configuration in `etc/apa-stat-scraper-2/config.json`
 4. Create an issue in the project repository
-## Actions
-
-### Login
-
-**Description**: Establishes an authenticated session with the APA website. This action handles the complete login flow including form submission, authorization page navigation, and notification dismissal.
-
-**Semantics**: 
-- Prompts for credentials if not provided via command line
-- Performs multi-step authentication (login → authorization → dashboard)
-- Automatically handles notification dialogues
-- Saves session data for future use
-- Returns success/failure status
-
-**Sample Commands**:
-```bash
-# Interactive login (will prompt for credentials)
-python app.py login
-
-# Login with credentials provided
-python app.py login --email your@email.com --password yourpassword
-
-# Login in headless mode (no browser window)
-python app.py login --headless
-
-# Get help for login action
-python app.py login --help
-```
-
-### Verify Session
-
-**Description**: Checks if the current session is valid and can access the APA dashboard. This action verifies authentication without requiring new credentials.
-
-**Semantics**:
-- Uses existing session data from previous login
-- Navigates to dashboard to verify access
-- Handles any notification dialogues
-- Reports session status and current page information
-- Returns success if authenticated, failure if not
-
-**Sample Commands**:
-```bash
-# Check session status
-python app.py verify-session
-
-# Check session in headless mode
-python app.py verify-session --headless
-
-# Get help for verify-session action
-python app.py verify-session --help
-```
-
-### Clear State
-
-**Description**: Clears all browser data, logs, cache, and temporary files. This action resets the application to a clean state, requiring re-authentication.
-
-**Semantics**:
-- Removes browser session data (cookies, cache, local storage)
-- Clears application logs and cache
-- Deletes temporary files
-- Recreates necessary directory structure
-- Requires confirmation unless --confirm flag is used
-- Returns success/failure status
-
-**Sample Commands**:
-```bash
-# Clear state with confirmation prompt
-python app.py clear-state
-
-# Clear state without confirmation
-python app.py clear-state --confirm
-
-# Get help for clear-state action
-python app.py clear-state --help
-```
-
-## Usage
-
-### General Commands
-
-```bash
-# Show all available actions
-python app.py --help
-
-# Get help for specific action
-python app.py <action> --help
-```
 
