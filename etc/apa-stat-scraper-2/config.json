@@ -1,0 +1,27 @@
+{
+  "browser": {
+    "headless": false,
+    "timeout": 30000,
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+  },
+  "session": {
+    "persist": true,
+    "timeout": 3600
+  },
+  "scraping": {
+    "delay_between_requests": 1.0,
+    "max_retries": 3,
+    "timeout": 30
+  },
+  "output": {
+    "default_format": "csv",
+    "include_timestamps": true,
+    "backup_previous": true
+  },
+  "logging": {
+    "level": "INFO",
+    "file": "apa-stat-scraper.log",
+    "max_size": "10MB",
+    "backup_count": 5
+  }
+}
