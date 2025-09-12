@@ -9,6 +9,7 @@ import sys
 from actions.login import LoginAction
 from actions.verify_session import VerifySessionAction
 from actions.clear_state import ClearStateAction
+from actions.extract_player import ExtractPlayerAction
 
 def main():
     """Main CLI entry point"""
@@ -20,6 +21,8 @@ Examples:
   python app.py login                    # Login to APA site
   python app.py verify-session          # Verify current session
   python app.py clear-state             # Clear browser state and data
+  python app.py extract-player --team-id 2336878 --member-id 2762169
+  python app.py extract-player --url "https://league.poolplayers.com/Philadelphia/member/2762169/2336878/teams"
         """
     )
     
@@ -70,6 +73,45 @@ Examples:
         help='Skip confirmation prompt'
     )
     
+    # Extract player action
+    extract_parser = subparsers.add_parser(
+        'extract-player',
+        help='Extract player statistics from a specific player page'
+    )
+    # Make URL optional and add team/member ID options
+    extract_parser.add_argument(
+        '--url',
+        help='URL of the player page to extract data from (optional if team-id and member-id provided)'
+    )
+    extract_parser.add_argument(
+        '--team-id',
+        help='Team ID of the player to extract data from'
+    )
+    extract_parser.add_argument(
+        '--member-id',
+        help='Member ID of the player to extract data from'
+    )
+    extract_parser.add_argument(
+        '--output',
+        help='Output file to save extracted data (optional)'
+    )
+    extract_parser.add_argument(
+        '--format',
+        choices=['json', 'csv'],
+        default='json',
+        help='Output format (default: json)'
+    )
+    extract_parser.add_argument(
+        '--headless',
+        action='store_true',
+        help='Run browser in headless mode'
+    )
+    extract_parser.add_argument(
+        '--no-terminal',
+        action='store_true',
+        help='Suppress terminal output (useful when only saving to file)'
+    )
+    
     args = parser.parse_args()
     
     try:
@@ -86,6 +128,17 @@ Examples:
         elif args.action == 'clear-state':
             action = ClearStateAction()
             success = action.run(confirm=args.confirm)
+        elif args.action == 'extract-player':
+            action = ExtractPlayerAction()
+            success = action.run(
+                team_id=args.team_id,
+                member_id=args.member_id,
+                player_url=args.url,
+                output_file=args.output,
+                format=args.format,
+                headless=args.headless,
+                terminal_output=not args.no_terminal
+            )
         else:
             print(f"❌ Unknown action: {args.action}")
             return 1

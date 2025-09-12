@@ -7,5 +7,6 @@ from .base import BaseAction
 from .login import LoginAction
 from .verify_session import VerifySessionAction
 from .clear_state import ClearStateAction
+from .extract_player import ExtractPlayerAction
 
-__all__ = ['BaseAction', 'LoginAction', 'VerifySessionAction', 'ClearStateAction']
+__all__ = ['BaseAction', 'LoginAction', 'VerifySessionAction', 'ClearStateAction', 'ExtractPlayerAction']

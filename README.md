@@ -8,10 +8,11 @@ A powerful CLI application for extracting player statistics from the APA (Americ
 - [Quick Start](#quick-start)
 - [Usage](#usage)
   - [Command Line Usage](#command-line-usage)
-  - [Actions](#actions)
-    - [Login](#login)
-    - [Verify Session](#verify-session)
-    - [Clear State](#clear-state)
+- [Actions](#actions)
+  - [Login](#login)
+  - [Verify Session](#verify-session)
+  - [Clear State](#clear-state)
+  - [Extract Player](#extract-player)
 - [Development](#development)
   - [Installation](#installation)
     - [Prerequisites](#prerequisites)
@@ -38,8 +39,9 @@ A powerful CLI application for extracting player statistics from the APA (Americ
 - **🔐 Session Management**: Persistent authentication with automatic session handling
 - **🔔 Notification Handling**: Automatically dismisses notification dialogues
 - **⚡ CLI Interface**: Easy-to-use command-line interface with multiple actions
+- **👤 Player Extraction**: Extract individual player statistics and information from player pages
 - **📊 Team Scraping**: Extract player statistics from team pages (coming soon)
-- **💾 Data Export**: Export statistics to CSV and JSON formats (coming soon)
+- **💾 Data Export**: Export statistics to CSV and JSON formats
 - **📈 Analytics Ready**: Structured data perfect for analysis and visualization
 - **🔒 LSB Compliant**: Follows Linux Standard Base standards for configuration and state
 - **🐍 Virtual Environment**: Isolated Python environment using venv
@@ -64,6 +66,9 @@ python app.py login
 
 # Verify session
 python app.py verify-session
+
+# Extract player data (interactive mode)
+python app.py extract-player
 ```
 
 ## Usage
@@ -151,6 +156,47 @@ python app.py clear-state --confirm
 
 # Get help for clear-state action
 python app.py clear-state --help
+```
+
+### Extract Player
+
+**Description**: Extracts player statistics and information from a specific player's team page on the APA website. This action can be used with either a player URL or by providing team ID and member ID directly. It navigates to the player page and extracts available data including player name, team information, current teams, past teams (with automatic scrolling to load additional data), and statistics. Data is displayed in a clean tabular format in the terminal using standard Python libraries.
+
+**Semantics**:
+- Requires either a player URL or both team ID and member ID
+- If no arguments provided, will prompt for team ID and member ID interactively
+- Uses existing session data from previous login
+- Navigates to the specified player page
+- Extracts player information, team details, current teams, and past teams
+- Automatically scrolls to load additional past teams data
+- Displays data in a formatted table in the terminal (can be suppressed with --no-terminal)
+- Shows detailed teams summary with current and past teams information
+- Handles any notification dialogues that appear
+- Can save extracted data to JSON or CSV format
+- Returns success/failure status with extracted data display
+
+**Sample Commands**:
+```bash
+# Interactive mode - will prompt for team ID and member ID
+python app.py extract-player
+
+# Using team ID and member ID directly
+python app.py extract-player --team-id 2336878 --member-id 2762169
+
+# Using URL (legacy method)
+python app.py extract-player --url "https://league.poolplayers.com/Philadelphia/member/2762169/2336878/teams"
+
+# Extract and save to JSON file (with terminal display)
+python app.py extract-player --team-id 2336878 --member-id 2762169 --output player_data.json
+
+# Extract and save to CSV file (suppress terminal output)
+python app.py extract-player --team-id 2336878 --member-id 2762169 --output player_data.csv --format csv --no-terminal
+
+# Extract in headless mode
+python app.py extract-player --team-id 2336878 --member-id 2762169 --headless
+
+# Get help for extract-player action
+python app.py extract-player --help
 ```
 
 ## Development
