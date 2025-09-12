@@ -2,6 +2,33 @@
 
 A powerful CLI application for extracting player statistics from the APA (American Poolplayers Association) website poolplayers.com. Built for billiards enthusiasts who want to analyze competitor statistics and team performance data.
 
+## Table of Contents
+
+- [Features](#features)
+- [Quick Start](#quick-start)
+- [Installation](#installation)
+  - [Prerequisites](#prerequisites)
+  - [Setup](#setup)
+- [Usage](#usage)
+  - [Available Commands](#available-commands)
+  - [Sample Workflow](#sample-workflow)
+- [Capabilities](#capabilities)
+  - [Current Features](#current-features)
+  - [Coming Soon Features](#coming-soon-features)
+- [Project Structure](#project-structure)
+- [Configuration](#configuration)
+  - [Configuration Options](#configuration-options)
+  - [Configuration Categories](#configuration-categories)
+- [Virtual Environment Management](#virtual-environment-management)
+- [Development](#development)
+  - [Adding New Actions](#adding-new-actions)
+- [Troubleshooting](#troubleshooting)
+  - [Common Issues](#common-issues)
+- [Future Roadmap](#future-roadmap)
+- [Contributing](#contributing)
+- [License](#license)
+- [Support](#support)
+
 ## Features
 
 - **🔐 Session Management**: Persistent authentication with automatic session handling
