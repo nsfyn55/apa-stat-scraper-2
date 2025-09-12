@@ -1,0 +1,49 @@
+MIT License
+
+Copyright (c) 2025 Arthur Carey
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+ADDITIONAL TERMS FOR APA STAT SCRAPER:
+
+1. RESPECT FOR APA WEBSITE: This software is designed to interact with the 
+   American Poolplayers Association (APA) website (poolplayers.com). Users 
+   must comply with the APA website's terms of service and rate limits. The 
+   author is not responsible for any violations of the APA website's terms 
+   of service.
+
+2. EDUCATIONAL USE: This software is intended for educational and personal 
+   use only. Commercial use of scraped data may violate the APA website's 
+   terms of service.
+
+3. NO WARRANTY FOR DATA ACCURACY: The author makes no warranty regarding 
+   the accuracy, completeness, or reliability of any data obtained through 
+   this software.
+
+4. RATE LIMITING: Users are responsible for implementing appropriate rate 
+   limiting and respecting the APA website's resources. Excessive requests 
+   may result in IP blocking or other restrictions.
+
+5. DATA PRIVACY: Users are responsible for handling any personal data 
+   obtained through this software in compliance with applicable privacy 
+   laws and regulations.
+
+By using this software, you agree to these additional terms and acknowledge 
+that you will use the software responsibly and in compliance with all 
+applicable terms of service and laws.

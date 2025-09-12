@@ -417,7 +417,14 @@ This project follows LSB standards and best practices:
 
 ## License
 
-This project is for educational and personal use. Please respect the APA website's terms of service and rate limits.
+This project is licensed under the MIT License with additional terms specific to web scraping. See [LICENSE](LICENSE) for full details.
+
+**Key Points:**
+- Open source and free to use, modify, and distribute
+- Educational and personal use encouraged
+- Commercial use may violate APA website terms of service
+- Users must respect APA website terms of service and rate limits
+- No warranty for data accuracy or website compatibility
 
 ## Support
 
