@@ -22,7 +22,12 @@ A powerful CLI application for extracting player statistics from the APA (Americ
     - [Configuration Categories](#configuration-categories)
   - [Virtual Environment Management](#virtual-environment-management)
   - [Adding New Actions](#adding-new-actions)
-- [Troubleshooting](#troubleshooting)
+- [FAQ](#faq)
+  - [What should I do if I get "No valid session found"?](#what-should-i-do-if-i-get-no-valid-session-found)
+  - [How do I fix browser issues?](#how-do-i-fix-browser-issues)
+  - [How do I resolve configuration issues?](#how-do-i-resolve-configuration-issues)
+  - [How do I fix virtual environment issues?](#how-do-i-fix-virtual-environment-issues)
+  - [How do I view application logs?](#how-do-i-view-application-logs)
 - [Future Roadmap](#future-roadmap)
 - [Contributing](#contributing)
 - [License](#license)
@@ -334,15 +339,15 @@ To add a new CLI action:
 4. Add the action to `app.py` argument parser
 5. Import and register in `actions/__init__.py`
 
-## Troubleshooting
+## FAQ
 
-#### Session Not Found
+#### What should I do if I get "No valid session found"?
 ```bash
 # If you get "No valid session found"
 python app.py login
 ```
 
-#### Browser Issues
+#### How do I fix browser issues?
 ```bash
 # Reinstall Playwright browsers
 playwright install
@@ -351,14 +356,14 @@ playwright install
 ls -la var/apa-stat-scraper-2/browser_data/
 ```
 
-#### Configuration Issues
+#### How do I resolve configuration issues?
 ```bash
 # Reset configuration to defaults
 rm etc/apa-stat-scraper-2/config.json
 python app.py verify-session  # This will recreate default config
 ```
 
-#### Virtual Environment Issues
+#### How do I fix virtual environment issues?
 ```bash
 # Recreate virtual environment
 deactivate
@@ -369,7 +374,7 @@ pip install -r requirements.txt
 playwright install
 ```
 
-#### Logs
+#### How do I view application logs?
 ```bash
 # View application logs
 tail -f var/apa-stat-scraper-2/logs/apa-stat-scraper.log
