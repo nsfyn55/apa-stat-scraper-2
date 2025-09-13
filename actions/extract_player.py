@@ -353,8 +353,23 @@ class ExtractPlayerAction(BaseAction):
             # Use the table-based extraction for current teams
             current_teams = await self._extract_all_teams_from_table()
             
-            # Filter for current teams (2025 seasons)
-            current_teams = [team for team in current_teams if '2025' in team.get('season', '')]
+            # Filter for current teams (most recent year found)
+            if current_teams:
+                # Find the most recent year in the data
+                years = []
+                for team in current_teams:
+                    season = team.get('season', '')
+                    if season:
+                        # Extract year from season (e.g., "Fall 2025" -> "2025")
+                        year_match = re.search(r'20\d{2}', season)
+                        if year_match:
+                            years.append(int(year_match.group()))
+                
+                if years:
+                    most_recent_year = max(years)
+                    # Filter for teams from the most recent year
+                    current_teams = [team for team in current_teams if str(most_recent_year) in team.get('season', '')]
+                    print(f"   📅 Using {most_recent_year} as current year")
             
             print(f"   ✅ Found {len(current_teams)} current team(s)")
             return current_teams
@@ -375,21 +390,28 @@ class ExtractPlayerAction(BaseAction):
             past_teams = []
             current_teams = []
             
+            # Find the most recent year in the data to determine current vs past
+            years = []
+            for team in all_teams:
+                season = team.get('season', '')
+                if season:
+                    year_match = re.search(r'20\d{2}', season)
+                    if year_match:
+                        years.append(int(year_match.group()))
+            
+            most_recent_year = max(years) if years else 2025  # Default to 2025 if no years found
+            
             for team in all_teams:
                 # Determine if it's a past team based on season
                 season = team.get('season', '')
-                if season and any(year in season for year in ['2023', '2024']):
-                    # Older seasons are likely past teams
-                    team['status'] = 'past'
-                    past_teams.append(team)
-                elif season and '2025' in season:
-                    # Current year might be current teams
+                if season and str(most_recent_year) in season:
+                    # Most recent year teams are current
                     team['status'] = 'current'
                     current_teams.append(team)
                 else:
-                    # Default to current if we can't determine
-                    team['status'] = 'current'
-                    current_teams.append(team)
+                    # ALL other years are past teams (no year filtering)
+                    team['status'] = 'past'
+                    past_teams.append(team)
             
             print(f"   ✅ Found {len(past_teams)} past team(s) and {len(current_teams)} current team(s)")
             return past_teams
@@ -404,7 +426,7 @@ class ExtractPlayerAction(BaseAction):
             all_teams = []
             previous_count = 0
             scroll_attempts = 0
-            max_scroll_attempts = 20  # Increased for more thorough scrolling
+            max_scroll_attempts = 30  # Increased for more thorough scrolling to load all historical data
             
             print("   🔄 Starting scroll loop to load all teams...")
             
@@ -427,7 +449,7 @@ class ExtractPlayerAction(BaseAction):
                     
                     # Scroll to bottom
                     await self.session_manager.page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
-                    await asyncio.sleep(2)  # Wait for content to load
+                    await asyncio.sleep(3.5)  # Wait for content to load (increased by 75%)
                     
                     # Check for "Load More" or "Show More" buttons
                     load_more_selectors = [
@@ -449,7 +471,7 @@ class ExtractPlayerAction(BaseAction):
                             if button and await button.is_visible():
                                 print("   🔘 Clicking 'Load More' button...")
                                 await button.click()
-                                await asyncio.sleep(3)  # Wait for content to load
+                                await asyncio.sleep(5.25)  # Wait for content to load (increased by 75%)
                                 button_clicked = True
                                 break
                         except:
@@ -458,7 +480,7 @@ class ExtractPlayerAction(BaseAction):
                     if not button_clicked:
                         # Try scrolling a bit more to trigger lazy loading
                         await self.session_manager.page.evaluate("window.scrollBy(0, 500)")
-                        await asyncio.sleep(1)
+                        await asyncio.sleep(1.75)  # Wait for lazy loading (increased by 75%)
                     
                     scroll_attempts += 1
                 else:
