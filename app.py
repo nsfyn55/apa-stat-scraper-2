@@ -18,11 +18,11 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  python app.py login                    # Login to APA site
-  python app.py verify-session          # Verify current session
-  python app.py clear-state             # Clear browser state and data
-  python app.py extract-player --team-id 2336878 --member-id 2762169
-  python app.py extract-player --url "https://league.poolplayers.com/Philadelphia/member/2762169/2336878/teams"
+  apa-stat-scraper login                    # Login to APA site
+  apa-stat-scraper verify-session          # Verify current session
+  apa-stat-scraper clear-state             # Clear browser state and data
+  apa-stat-scraper extract-player --team-id 2336878 --member-id 2762169
+  apa-stat-scraper extract-player --url "https://league.poolplayers.com/Philadelphia/member/2762169/2336878/teams"
         """
     )
     

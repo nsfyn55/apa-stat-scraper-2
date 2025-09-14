@@ -6,6 +6,7 @@ A powerful CLI application for extracting player statistics from the APA (Americ
 
 - [Features](#features)
 - [Quick Start](#quick-start)
+- [Installation](#installation)
 - [Usage](#usage)
   - [Command Line Usage](#command-line-usage)
 - [Actions](#actions)
@@ -39,6 +40,7 @@ A powerful CLI application for extracting player statistics from the APA (Americ
 - **🔐 Session Management**: Persistent authentication with automatic session handling
 - **🔔 Notification Handling**: Automatically dismisses notification dialogues
 - **⚡ CLI Interface**: Easy-to-use command-line interface with multiple actions
+- **📦 Binary Installation**: Install as a system binary for easy access from anywhere
 - **👤 Player Extraction**: Extract individual player statistics and information from player pages
 - **📊 Team Scraping**: Extract player statistics from team pages (coming soon)
 - **💾 Data Export**: Export statistics to CSV and JSON formats
@@ -62,14 +64,55 @@ pip install -r requirements.txt
 playwright install
 
 # Login to APA site
-python app.py login
+apa-stat-scraper login
 
 # Verify session
-python app.py verify-session
+apa-stat-scraper verify-session
 
 # Extract player data (interactive mode)
-python app.py extract-player
+# Or use the binary directly after installation
+apa-stat-scraper extract-player
 ```
+
+## Installation
+
+The APA Stat Scraper provides a convenient binary interface that can be installed system-wide or added to your PATH.
+
+### Option 1: Add to PATH (Recommended)
+
+Add the project directory to your shell PATH:
+
+```bash
+# Add to your shell configuration
+echo 'export PATH="$HOME/src/apa-stat-scraper-2:$PATH"' >> ~/.zshrc
+source ~/.zshrc
+```
+
+### Option 2: System-wide Installation
+
+```bash
+# Copy binary to system directory
+sudo cp apa-stat-scraper /usr/local/bin/
+```
+
+### Option 3: User Bin Directory
+
+```bash
+# Create user bin directory and copy binary
+mkdir -p ~/bin
+cp apa-stat-scraper ~/bin/
+echo 'export PATH="$HOME/bin:$PATH"' >> ~/.zshrc
+source ~/.zshrc
+```
+
+### Option 4: Create Symlink
+
+```bash
+# Create symlink to system directory
+sudo ln -s $(pwd)/apa-stat-scraper /usr/local/bin/apa-stat-scraper
+```
+
+After installation, you can use `apa-stat-scraper` from anywhere in your terminal.
 
 ## Usage
 
@@ -77,10 +120,10 @@ python app.py extract-player
 
 ```bash
 # Show all available actions
-python app.py --help
+apa-stat-scraper --help
 
 # Get help for specific action
-python app.py <action> --help
+apa-stat-scraper <action> --help
 ```
 
 ### Actions
@@ -99,16 +142,16 @@ python app.py <action> --help
 **Sample Commands**:
 ```bash
 # Interactive login (will prompt for credentials)
-python app.py login
+apa-stat-scraper login
 
 # Login with credentials provided
-python app.py login --email your@email.com --password yourpassword
+apa-stat-scraper login --email your@email.com --password yourpassword
 
 # Login in headless mode (no browser window)
-python app.py login --headless
+apa-stat-scraper login --headless
 
 # Get help for login action
-python app.py login --help
+apa-stat-scraper login --help
 ```
 
 ### Verify Session
@@ -125,13 +168,13 @@ python app.py login --help
 **Sample Commands**:
 ```bash
 # Check session status
-python app.py verify-session
+apa-stat-scraper verify-session
 
 # Check session in headless mode
-python app.py verify-session --headless
+apa-stat-scraper verify-session --headless
 
 # Get help for verify-session action
-python app.py verify-session --help
+apa-stat-scraper verify-session --help
 ```
 
 ### Clear State
@@ -149,13 +192,13 @@ python app.py verify-session --help
 **Sample Commands**:
 ```bash
 # Clear state with confirmation prompt
-python app.py clear-state
+apa-stat-scraper clear-state
 
 # Clear state without confirmation
-python app.py clear-state --confirm
+apa-stat-scraper clear-state --confirm
 
 # Get help for clear-state action
-python app.py clear-state --help
+apa-stat-scraper clear-state --help
 ```
 
 ### Extract Player
@@ -178,25 +221,25 @@ python app.py clear-state --help
 **Sample Commands**:
 ```bash
 # Interactive mode - will prompt for team ID and member ID
-python app.py extract-player
+apa-stat-scraper extract-player
 
 # Using team ID and member ID directly
-python app.py extract-player --team-id 2336878 --member-id 2762169
+apa-stat-scraper extract-player --team-id 2336878 --member-id 2762169
 
 # Using URL (legacy method)
-python app.py extract-player --url "https://league.poolplayers.com/Philadelphia/member/2762169/2336878/teams"
+apa-stat-scraper extract-player --url "https://league.poolplayers.com/Philadelphia/member/2762169/2336878/teams"
 
 # Extract and save to JSON file (with terminal display)
-python app.py extract-player --team-id 2336878 --member-id 2762169 --output player_data.json
+apa-stat-scraper extract-player --team-id 2336878 --member-id 2762169 --output player_data.json
 
 # Extract and save to CSV file (suppress terminal output)
-python app.py extract-player --team-id 2336878 --member-id 2762169 --output player_data.csv --format csv --no-terminal
+apa-stat-scraper extract-player --team-id 2336878 --member-id 2762169 --output player_data.csv --format csv --no-terminal
 
 # Extract in headless mode
-python app.py extract-player --team-id 2336878 --member-id 2762169 --headless
+apa-stat-scraper extract-player --team-id 2336878 --member-id 2762169 --headless
 
 # Get help for extract-player action
-python app.py extract-player --help
+apa-stat-scraper extract-player --help
 ```
 
 ## Development
@@ -236,26 +279,26 @@ playwright install
 
 4. **Verify installation:**
 ```bash
-python app.py --help
+apa-stat-scraper --help
 ```
 
 ### Sample Workflow
 
 ```bash
 # 1. First time setup
-python app.py login
+apa-stat-scraper login
 # Enter your APA credentials when prompted
 
 # 2. Verify everything is working
-python app.py verify-session
+apa-stat-scraper verify-session
 # Should show: "✅ SUCCESS! Dashboard is accessible"
 
 # 3. Your session is now saved and persistent
 # No need to login again unless session expires
 
 # 4. Future sessions (coming soon)
-# python app.py scrape-team --team-id 12345678
-# python app.py export-stats --format csv --output team_stats.csv
+# apa-stat-scraper scrape-team --team-id 12345678
+# apa-stat-scraper export-stats --format csv --output team_stats.csv
 ```
 
 ### Project Structure
@@ -390,7 +433,7 @@ To add a new CLI action:
 #### What should I do if I get "No valid session found"?
 ```bash
 # If you get "No valid session found"
-python app.py login
+apa-stat-scraper login
 ```
 
 #### How do I fix browser issues?
@@ -406,7 +449,7 @@ ls -la var/apa-stat-scraper-2/browser_data/
 ```bash
 # Reset configuration to defaults
 rm etc/apa-stat-scraper-2/config.json
-python app.py verify-session  # This will recreate default config
+apa-stat-scraper verify-session  # This will recreate default config
 ```
 
 #### How do I fix virtual environment issues?
