@@ -7,6 +7,7 @@ A powerful CLI application for extracting player statistics from the APA (Americ
 - [Features](#features)
 - [Quick Start](#quick-start)
 - [Installation](#installation)
+  - [Zsh Tab Completion](#zsh-tab-completion)
 - [Usage](#usage)
   - [Command Line Usage](#command-line-usage)
 - [Actions](#actions)
@@ -49,7 +50,6 @@ A powerful CLI application for extracting player statistics from the APA (Americ
 - **🐍 Virtual Environment**: Isolated Python environment using venv
 
 ## Quick Start
-
 ```bash
 # Clone and setup
 git clone <repository-url>
@@ -81,7 +81,6 @@ The APA Stat Scraper provides a convenient binary interface that can be installe
 ### Option 1: Add to PATH (Recommended)
 
 Add the project directory to your shell PATH:
-
 ```bash
 # Add to your shell configuration
 echo 'export PATH="$HOME/src/apa-stat-scraper-2:$PATH"' >> ~/.zshrc
@@ -89,14 +88,12 @@ source ~/.zshrc
 ```
 
 ### Option 2: System-wide Installation
-
 ```bash
 # Copy binary to system directory
 sudo cp apa-stat-scraper /usr/local/bin/
 ```
 
 ### Option 3: User Bin Directory
-
 ```bash
 # Create user bin directory and copy binary
 mkdir -p ~/bin
@@ -106,7 +103,6 @@ source ~/.zshrc
 ```
 
 ### Option 4: Create Symlink
-
 ```bash
 # Create symlink to system directory
 sudo ln -s $(pwd)/apa-stat-scraper /usr/local/bin/apa-stat-scraper
@@ -114,10 +110,52 @@ sudo ln -s $(pwd)/apa-stat-scraper /usr/local/bin/apa-stat-scraper
 
 After installation, you can use `apa-stat-scraper` from anywhere in your terminal.
 
+### Zsh Tab Completion
+
+The APA Stat Scraper includes comprehensive zsh tab completion for all actions and options, making the CLI much more user-friendly.
+
+#### Installation
+
+Run the completion installation script:
+```bash
+./install-completion.sh
+```
+
+This will install the completion script to `~/.zsh/completions/` and add the necessary configuration to your `~/.zshrc` file.
+
+#### Usage
+
+After installation, reload your shell configuration:
+```bash
+source ~/.zshrc
+```
+
+Then you can use tab completion:
+```bash
+# Complete actions
+apa-stat-scraper <TAB>
+# Shows: login  verify-session  clear-state  extract-player
+
+# Complete extract-player options
+apa-stat-scraper extract-player <TAB>
+# Shows: --team-id  --member-id  --url  --output  --format  --headless  --no-terminal
+
+# Complete format options
+apa-stat-scraper extract-player --format <TAB>
+# Shows: json  csv
+```
+
+#### Features
+
+- **Action completion**: All available actions with descriptions
+- **Option completion**: All command-line options with help text
+- **Value completion**: Smart completion for specific values (formats, file paths)
+- **File path completion**: Intelligent file path completion for output files
+- **URL completion**: URL completion for player page URLs
+
 ## Usage
 
 ### Command Line Usage
-
 ```bash
 # Show all available actions
 apa-stat-scraper --help
@@ -283,7 +321,6 @@ apa-stat-scraper --help
 ```
 
 ### Sample Workflow
-
 ```bash
 # 1. First time setup
 apa-stat-scraper login
@@ -302,7 +339,6 @@ apa-stat-scraper verify-session
 ```
 
 ### Project Structure
-
 ```
 apa-stat-scraper-2/
 ├── app.py                 # CLI entry point
@@ -340,7 +376,6 @@ The application follows LSB (Linux Standard Base) standards for configuration an
 ### Configuration Options
 
 Edit `etc/apa-stat-scraper-2/config.json` to customize:
-
 ```json
 {
   "browser": {

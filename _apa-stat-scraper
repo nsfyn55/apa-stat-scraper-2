@@ -1,0 +1,48 @@
+#compdef apa-stat-scraper
+# APA Stat Scraper zsh completion script
+
+_apa_stat_scraper() {
+    local context state line
+    typeset -A opt_args
+
+    _arguments -C \
+        '1: :->actions' \
+        '*::arg:->args'
+
+    case $state in
+        actions)
+            _values 'actions' \
+                'login[Authenticate with APA website]' \
+                'verify-session[Check if session is valid]' \
+                'clear-state[Clear stored session data]' \
+                'extract-player[Extract player statistics]'
+            ;;
+        args)
+            case $line[1] in
+                login)
+                    _arguments \
+                        '--headless[Run browser in headless mode]'
+                    ;;
+                verify-session)
+                    _arguments \
+                        '--headless[Run browser in headless mode]'
+                    ;;
+                clear-state)
+                    # No additional arguments for clear-state
+                    ;;
+                extract-player)
+                    _arguments \
+                        '--team-id[Team ID of the player]:team_id:' \
+                        '--member-id[Member ID of the player]:member_id:' \
+                        '--url[URL of the player page]:url:_urls' \
+                        '--output[Output file path]:file:_files -g "*.{json,csv}"' \
+                        '--format[Output format]:format:(json csv)' \
+                        '--headless[Run browser in headless mode]' \
+                        '--no-terminal[Suppress terminal output]'
+                    ;;
+            esac
+            ;;
+    esac
+}
+
+_apa_stat_scraper "$@"
