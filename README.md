@@ -118,7 +118,7 @@ The APA Stat Scraper includes comprehensive zsh tab completion for all actions a
 
 Run the completion installation script:
 ```bash
-./install-completion.sh
+./utilities/install-completion.sh
 ```
 
 This will install the completion script to `~/.zsh/completions/` and add the necessary configuration to your `~/.zshrc` file.
