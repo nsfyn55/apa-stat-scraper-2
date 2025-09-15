@@ -16,7 +16,9 @@ A powerful CLI application for extracting player statistics from the APA (Americ
   - [Clear State](#clear-state)
   - [Extract Player](#extract-player)
   - [Extract Team](#extract-team)
+  - [Cache Manage](#cache-manage)
 - [Development](#development)
+  - [Caching System](#caching-system)
   - [Installation](#installation)
     - [Prerequisites](#prerequisites)
     - [Setup](#setup)
@@ -46,6 +48,7 @@ A powerful CLI application for extracting player statistics from the APA (Americ
 - **🖥️ Headless by Default**: Runs in headless mode by default for better performance and automation
 - **👤 Player Extraction**: Extract individual player statistics and information from player pages
 - **📊 Team Extraction**: Extract team statistics and player data from team pages
+- **💾 Smart Caching**: 12-hour intelligent caching system with separate cache for expanded/unexpanded data
 - **🔄 Retry Logic**: Automatic retry mechanism for timeout errors and network issues
 - **💾 Data Export**: Export statistics to CSV and JSON formats
 - **📈 Analytics Ready**: Structured data perfect for analysis and visualization
@@ -75,8 +78,11 @@ apa-stat-scraper verify-session
 # Extract player data (interactive mode)
 apa-stat-scraper extract-player
 
-# Extract team data
+# Extract team data (uses intelligent caching)
 apa-stat-scraper extract-team --team-id 12821920
+
+# Extract team data with fresh data (skip cache)
+apa-stat-scraper extract-team --team-id 12821920 --no-cache
 ```
 
 ## Installation
@@ -143,7 +149,7 @@ apa-stat-scraper <TAB>
 
 # Complete extract-player options
 apa-stat-scraper extract-player <TAB>
-# Shows: --userid  --url  --output  --format  --launch-browser  --no-terminal
+# Shows: --userid  --url  --output  --format  --launch-browser  --no-terminal  --no-cache
 
 # Complete format options
 apa-stat-scraper extract-player --format <TAB>
@@ -306,6 +312,8 @@ apa-stat-scraper clear-state --help
   - **Sample Output**: JSON format preserves all data structure, CSV format creates tabular data
 - `--no-terminal` (optional): Suppress terminal output
   - **Behavior**: Hides formatted table output, useful for automated processing
+- `--no-cache` (optional): Skip cache and force fresh data extraction
+  - **Behavior**: Bypasses cache system and extracts fresh data from website
 - `--launch-browser` (optional): Show browser window for debugging
   - **Behavior**: Opens browser window to show data extraction process
 
@@ -330,6 +338,9 @@ apa-stat-scraper extract-player --userid 3287288 --league "Los Angeles" --output
 
 # Extract with browser window visible
 apa-stat-scraper extract-player --userid 3287288 --league "Chicago" --launch-browser
+
+# Extract with fresh data (skip cache)
+apa-stat-scraper extract-player --userid 3287288 --no-cache
 
 # Get help for extract-player action
 apa-stat-scraper extract-player --help
@@ -369,6 +380,8 @@ apa-stat-scraper extract-player --help
   - **Sample Output**: JSON format preserves all data structure, CSV format creates tabular data
 - `--no-terminal` (optional): Suppress terminal output
   - **Behavior**: Hides formatted table output, useful for automated processing
+- `--no-cache` (optional): Skip cache and force fresh data extraction
+  - **Behavior**: Bypasses cache system and extracts fresh data from website
 - `--launch-browser` (optional): Show browser window for debugging
   - **Behavior**: Opens browser window to show team data extraction process
 
@@ -391,6 +404,12 @@ apa-stat-scraper extract-team --team-id 12821920 --output team_data.csv --format
 
 # Extract with browser window visible
 apa-stat-scraper extract-team --team-id 12821920 --launch-browser
+
+# Extract with fresh data (skip cache)
+apa-stat-scraper extract-team --team-id 12821920 --no-cache
+
+# Extract expanded data with fresh data (skip cache)
+apa-stat-scraper extract-team --team-id 12821920 --expand --no-cache
 
 # Get help for extract-team action
 apa-stat-scraper extract-team --help
@@ -421,7 +440,132 @@ Stephen McDonald     | 19162437   | 3287288    | 3           | 1/1              
 ...
 ```
 
+### Cache Manage
+
+**Description**: Manages the application cache system including viewing statistics, clearing cache entries, and cleaning up expired files. This action provides comprehensive cache management functionality through a unified command-line interface.
+
+**Features**:
+- View detailed cache statistics and usage information
+- Clear all cache files or specific cache entries
+- Clean up expired cache files automatically
+- Support for both player and team cache management
+- LSB-compliant cache directory management
+- Human-readable cache size formatting
+
+**Options**:
+- `stats`: Display cache statistics
+  - **Behavior**: Shows total files, valid files, expired files, expanded/unexpanded counts, and cache directory location
+- `clear --all`: Clear all cache files
+  - **Behavior**: Removes all cached data files from the cache directory
+- `clear --specific`: Clear specific cache entry
+  - **Behavior**: Removes cache files for a specific action type and identifier
+  - **Requires**: `--action-type` and `--identifier` parameters
+- `cleanup`: Clean up expired cache files
+  - **Behavior**: Removes cache files that have exceeded the 12-hour expiration time
+
+**Sub-options for clear --specific**:
+- `--action-type` (required): Type of action to clear cache for
+  - **Input**: "player" or "team"
+  - **Behavior**: Specifies which type of cached data to clear
+- `--identifier` (required): Identifier to clear cache for
+  - **Input**: Player ID or team ID string
+  - **Behavior**: Specifies which specific cached entry to remove
+- `--league` (optional): League to clear cache for
+  - **Input**: League name string
+  - **Behavior**: Further narrows down which cache entries to clear
+- `--expand` (optional): Clear expanded cache entries only
+  - **Behavior**: Only removes cache files for expanded data (with --expand flag)
+
+**Sample Commands**:
+```bash
+# View cache statistics
+apa-stat-scraper cache-manage stats
+
+# Clear all cache files
+apa-stat-scraper cache-manage clear --all
+
+# Clear specific team cache
+apa-stat-scraper cache-manage clear --specific --action-type team --identifier 12821920
+
+# Clear specific player cache
+apa-stat-scraper cache-manage clear --specific --action-type player --identifier 2762169
+
+# Clear expanded team cache for specific league
+apa-stat-scraper cache-manage clear --specific --action-type team --identifier 12821920 --league "Philadelphia" --expand
+
+# Clean up expired cache files
+apa-stat-scraper cache-manage cleanup
+```
+
+**Sample Output**:
+```
+📊 Cache Statistics
+==================================================
+Total cache files: 15
+Valid files: 12
+Expired files: 3
+Expanded files: 8
+Unexpanded files: 7
+
+Cache directory: /path/to/var/apa-stat-scraper-2/cache/
+Cache size: 2.3 MB
+```
+
 ## Development
+
+### Caching System
+
+The APA Stat Scraper includes an intelligent caching system that significantly improves performance and reduces load on the APA website.
+
+#### Features
+
+- **12-Hour Cache Duration**: Cached data remains valid for 12 hours
+- **Separate Cache Keys**: Expanded and unexpanded data are cached separately
+- **Automatic Cache Management**: Cache files are automatically cleaned up when expired
+- **Cache Statistics**: View cache usage and statistics
+- **Skip Cache Option**: Use `--no-cache` to force fresh data extraction
+
+#### How It Works
+
+1. **First Request**: Data is extracted from the website and cached
+2. **Subsequent Requests**: Data is served from cache if still valid
+3. **Cache Expiration**: After 12 hours, cache is invalidated and fresh data is fetched
+4. **Separate Caches**: 
+   - `extract-team` → caches unexpanded data
+   - `extract-team --expand` → caches expanded data separately
+
+#### Cache Location
+
+Cache files are stored in `var/apa-stat-scraper-2/cache/` following LSB standards:
+- **Cache Directory**: `var/apa-stat-scraper-2/cache/`
+- **File Format**: JSON files with MD5 hash names
+- **Metadata**: Each cache file includes timestamp and source information
+
+#### Cache Management
+
+Use the `cache-manage` command to manage the application cache:
+
+```bash
+# View cache statistics
+apa-stat-scraper cache-manage stats
+
+# Clear all cache files
+apa-stat-scraper cache-manage clear --all
+
+# Clear specific cache entry
+apa-stat-scraper cache-manage clear --specific --action-type team --identifier 12345
+
+# Clean up expired cache files
+apa-stat-scraper cache-manage cleanup
+```
+
+#### Cache Benefits
+
+- **Faster Execution**: Subsequent runs use cached data (no browser automation needed)
+- **Reduced Load**: Less stress on the APA website
+- **Bandwidth Savings**: No need to re-download data
+- **Reliability**: Works even if network is temporarily unavailable
+- **Cost Efficiency**: Reduces API-like usage of the website
 
 ### Installation
 
@@ -486,6 +630,7 @@ apa-stat-scraper-2/
 ├── config.py              # Configuration management (LSB-compliant)
 ├── logger.py              # Logging system (LSB-compliant)
 ├── session_manager.py     # Session management and browser automation
+├── cache_manager.py       # Intelligent caching system
 ├── actions/               # CLI actions
 │   ├── __init__.py
 │   ├── base.py           # Base action class
@@ -699,6 +844,7 @@ ls -la var/apa-stat-scraper-2/logs/
 - ✅ Player performance data collection
 - ✅ Robust retry logic for network issues
 - ✅ Team expansion with detailed player statistics
+- ✅ Intelligent caching system with 12-hour duration
 - Match history scraping (coming soon)
 
 ### Phase 2: Data Export ✅

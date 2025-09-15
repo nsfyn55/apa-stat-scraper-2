@@ -16,7 +16,8 @@ _apa_stat_scraper() {
                 'verify-session[Check if session is valid]' \
                 'clear-state[Clear stored session data]' \
                 'extract-player[Extract player statistics]' \
-                'extract-team[Extract team statistics]'
+                'extract-team[Extract team statistics]' \
+                'cache-manage[Manage application cache]'
             ;;
         args)
             case $line[1] in
@@ -42,7 +43,8 @@ _apa_stat_scraper() {
                         '--output[Output file path]:file:_files -g "*.{json,csv}"' \
                         '--format[Output format]:format:(json csv)' \
                         '--launch-browser[Launch browser window (default: headless mode)]' \
-                        '--no-terminal[Suppress terminal output]'
+                        '--no-terminal[Suppress terminal output]' \
+                        '--no-cache[Skip cache and force fresh data extraction]'
                     ;;
                 extract-team)
                     _arguments \
@@ -52,7 +54,32 @@ _apa_stat_scraper() {
                         '--format[Output format]:format:(json csv)' \
                         '--launch-browser[Launch browser window (default: headless mode)]' \
                         '--no-terminal[Suppress terminal output]' \
-                        '--expand[Expand player data with detailed statistics]'
+                        '--expand[Expand player data with detailed statistics]' \
+                        '--no-cache[Skip cache and force fresh data extraction]'
+                    ;;
+                cache-manage)
+                    _arguments \
+                        '1: :->cache_actions' \
+                        '*::arg:->cache_args'
+                    ;;
+            esac
+            ;;
+        cache_actions)
+            _values 'cache actions' \
+                'stats[Show cache statistics]' \
+                'clear[Clear cache entries]' \
+                'cleanup[Clean up expired cache files]'
+            ;;
+        cache_args)
+            case $line[1] in
+                clear)
+                    _arguments \
+                        '--all[Clear all cache files]' \
+                        '--specific[Clear specific cache entry]' \
+                        '--action-type[Type of action to clear cache for]:action_type:(player team)' \
+                        '--identifier[Identifier to clear cache for]:identifier:' \
+                        '--league[League to clear cache for]:league:' \
+                        '--expand[Clear expanded cache entries only]'
                     ;;
             esac
             ;;

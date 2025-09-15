@@ -9,11 +9,12 @@ import re
 from pathlib import Path
 from .base import BaseAction
 from config import config
+from cache_manager import CacheManager
 
 class ExtractPlayerAction(BaseAction):
     """Action to extract player statistics from a specific player page"""
     
-    def run(self, userid=None, player_url=None, output_file=None, format='json', headless=False, terminal_output=True, league=None):
+    def run(self, userid=None, player_url=None, output_file=None, format='json', headless=False, terminal_output=True, league=None, no_cache=False):
         """Run the extract player action"""
         print("🚀 APA Stat Scraper - Extract Player")
         
@@ -50,6 +51,10 @@ class ExtractPlayerAction(BaseAction):
         
         # Store userid as instance variable
         self.userid = userid
+        
+        # Initialize cache manager
+        self.cache_manager = CacheManager()
+        self.no_cache = no_cache
         
         return self._run_with_session(
             player_url=player_url,
@@ -113,6 +118,35 @@ class ExtractPlayerAction(BaseAction):
     async def _run_async(self, player_url, output_file=None, format='json', headless=False, terminal_output=True, league=None):
         """Async implementation of player extraction"""
         try:
+            # Check cache first (unless --no-cache is specified)
+            if not self.no_cache:
+                print("🔍 Checking cache for player data...")
+                cached_data = self.cache_manager.get_cached_data('player', self.userid, self.league)
+                if cached_data:
+                    print("✅ Found valid cached data!")
+                    print(f"   📅 Cached at: {cached_data.get('_cache_info', {}).get('cached_at', 'Unknown')}")
+                    
+                    # Display cached data
+                    if terminal_output:
+                        self._display_player_data_table(cached_data)
+                    else:
+                        self._display_player_data(cached_data)
+                    
+                    # Save to file if requested
+                    if output_file:
+                        success = await self._save_player_data(cached_data, output_file, format)
+                        if success:
+                            print(f"💾 Player data saved to: {output_file}")
+                        else:
+                            print("❌ Failed to save player data")
+                            return False
+                    
+                    return True
+                else:
+                    print("📭 No valid cached data found, proceeding with extraction...")
+            else:
+                print("🚫 Cache disabled, proceeding with extraction...")
+            
             # Start browser
             await self.session_manager.start_browser(headless=headless)
             
@@ -145,6 +179,15 @@ class ExtractPlayerAction(BaseAction):
             if not player_data:
                 print("❌ Failed to extract player data")
                 return False
+            
+            # Cache the extracted data (unless --no-cache is specified)
+            if not self.no_cache:
+                print("💾 Caching extracted data...")
+                cache_success = self.cache_manager.cache_data('player', self.userid, player_data, self.league)
+                if cache_success:
+                    print("✅ Data cached successfully")
+                else:
+                    print("⚠️ Failed to cache data")
             
             # Display extracted data
             if terminal_output:

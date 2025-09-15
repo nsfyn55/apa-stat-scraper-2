@@ -10,11 +10,12 @@ from pathlib import Path
 from .base import BaseAction
 from .team_data_extractor import TeamDataExtractor
 from config import config
+from cache_manager import CacheManager
 
 class ExtractTeamAction(BaseAction):
     """Action to extract team statistics from a specific team page"""
     
-    def run(self, team_id=None, output_file=None, format='json', headless=False, terminal_output=True, league=None, expand=False):
+    def run(self, team_id=None, output_file=None, format='json', headless=False, terminal_output=True, league=None, expand=False, no_cache=False):
         """Run the extract team action"""
         print("🚀 APA Stat Scraper - Extract Team")
         
@@ -41,6 +42,11 @@ class ExtractTeamAction(BaseAction):
         
         # Store team_id as instance variable
         self.team_id = team_id
+        
+        # Initialize cache manager
+        self.cache_manager = CacheManager()
+        self.no_cache = no_cache
+        self.expand = expand
         
         return self._run_with_session(
             team_url=team_url,
@@ -75,6 +81,35 @@ class ExtractTeamAction(BaseAction):
     async def _run_async(self, team_url, output_file=None, format='json', headless=False, terminal_output=True, expand=False):
         """Async implementation of team extraction"""
         try:
+            # Check cache first (unless --no-cache is specified)
+            if not self.no_cache:
+                print("🔍 Checking cache for team data...")
+                cached_data = self.cache_manager.get_cached_data('team', self.team_id, self.league, self.expand)
+                if cached_data:
+                    print("✅ Found valid cached data!")
+                    print(f"   📅 Cached at: {cached_data.get('_cache_info', {}).get('cached_at', 'Unknown')}")
+                    
+                    # Display cached data
+                    if terminal_output:
+                        self._display_team_data_table(cached_data)
+                    else:
+                        self._display_team_data(cached_data)
+                    
+                    # Save to file if requested
+                    if output_file:
+                        success = await self._save_team_data(cached_data, output_file, format)
+                        if success:
+                            print(f"💾 Team data saved to: {output_file}")
+                        else:
+                            print("❌ Failed to save team data")
+                            return False
+                    
+                    return True
+                else:
+                    print("📭 No valid cached data found, proceeding with extraction...")
+            else:
+                print("🚫 Cache disabled, proceeding with extraction...")
+            
             # Start browser
             await self.session_manager.start_browser(headless=headless)
             
@@ -112,6 +147,15 @@ class ExtractTeamAction(BaseAction):
             if expand:
                 print("🔍 Expanding player data with detailed statistics...")
                 team_data = await self._expand_player_data(team_data)
+            
+            # Cache the extracted data (unless --no-cache is specified)
+            if not self.no_cache:
+                print("💾 Caching extracted data...")
+                cache_success = self.cache_manager.cache_data('team', self.team_id, team_data, self.league, self.expand)
+                if cache_success:
+                    print("✅ Data cached successfully")
+                else:
+                    print("⚠️ Failed to cache data")
             
             # Display extracted data
             if terminal_output:
