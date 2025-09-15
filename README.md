@@ -34,6 +34,7 @@ A powerful CLI application for extracting player statistics from the APA (Americ
   - [How do I resolve configuration issues?](#how-do-i-resolve-configuration-issues)
   - [How do I fix virtual environment issues?](#how-do-i-fix-virtual-environment-issues)
   - [How do I view application logs?](#how-do-i-view-application-logs)
+  - [The data I am seeing doesn't match what is on the site?](#the-data-i-am-seeing-doesnt-match-what-is-on-the-site)
 - [Future Roadmap](#future-roadmap)
 - [Contributing](#contributing)
 - [License](#license)
@@ -836,6 +837,45 @@ tail -f var/apa-stat-scraper-2/logs/apa-stat-scraper.log
 # Check log rotation
 ls -la var/apa-stat-scraper-2/logs/
 ```
+
+#### The data I am seeing doesn't match what is on the site?
+This is likely due to cached data. The application uses a 12-hour cache to improve performance and reduce load on the APA website. If you're seeing outdated data, try these solutions:
+
+**Option 1: Force fresh data extraction (recommended)**
+```bash
+# Skip cache and get fresh data
+apa-stat-scraper extract-player --userid 3287288 --no-cache
+apa-stat-scraper extract-team --team-id 12821920 --no-cache
+```
+
+**Option 2: Clear specific cache entries**
+```bash
+# Clear cache for a specific player
+apa-stat-scraper cache-manage clear --specific --action-type player --identifier 3287288
+
+# Clear cache for a specific team
+apa-stat-scraper cache-manage clear --specific --action-type team --identifier 12821920
+
+# Clear expanded team cache (if using --expand)
+apa-stat-scraper cache-manage clear --specific --action-type team --identifier 12821920 --expand
+```
+
+**Option 3: Clear all cache (if needed)**
+```bash
+# Clear all cached data
+apa-stat-scraper cache-manage clear --all
+```
+
+**Option 4: Check cache status**
+```bash
+# View cache statistics to see what's cached
+apa-stat-scraper cache-manage stats
+```
+
+**Why does this happen?**
+- The cache stores data for 12 hours to improve performance
+- If player/team data changes on the website, cached data becomes outdated
+- Use `--no-cache` for always-fresh data, or clear specific cache entries as needed
 
 ## Future Roadmap
 
