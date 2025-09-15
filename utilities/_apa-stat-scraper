@@ -51,7 +51,8 @@ _apa_stat_scraper() {
                         '--output[Output file path]:file:_files -g "*.{json,csv}"' \
                         '--format[Output format]:format:(json csv)' \
                         '--launch-browser[Launch browser window (default: headless mode)]' \
-                        '--no-terminal[Suppress terminal output]'
+                        '--no-terminal[Suppress terminal output]' \
+                        '--expand[Expand player data with detailed statistics]'
                     ;;
             esac
             ;;

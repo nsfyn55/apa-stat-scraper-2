@@ -8,12 +8,13 @@ import json
 import re
 from pathlib import Path
 from .base import BaseAction
+from .team_data_extractor import TeamDataExtractor
 from config import config
 
 class ExtractTeamAction(BaseAction):
     """Action to extract team statistics from a specific team page"""
     
-    def run(self, team_id=None, output_file=None, format='json', headless=False, terminal_output=True, league=None):
+    def run(self, team_id=None, output_file=None, format='json', headless=False, terminal_output=True, league=None, expand=False):
         """Run the extract team action"""
         print("🚀 APA Stat Scraper - Extract Team")
         
@@ -46,7 +47,8 @@ class ExtractTeamAction(BaseAction):
             output_file=output_file,
             format=format,
             headless=headless,
-            terminal_output=terminal_output
+            terminal_output=terminal_output,
+            expand=expand
         )
     
     def _determine_league(self, cli_league=None):
@@ -70,7 +72,7 @@ class ExtractTeamAction(BaseAction):
         print("   🏠 Using default league: Philadelphia")
         return "Philadelphia"
     
-    async def _run_async(self, team_url, output_file=None, format='json', headless=False, terminal_output=True):
+    async def _run_async(self, team_url, output_file=None, format='json', headless=False, terminal_output=True, expand=False):
         """Async implementation of team extraction"""
         try:
             # Start browser
@@ -105,6 +107,11 @@ class ExtractTeamAction(BaseAction):
             if not team_data:
                 print("❌ Failed to extract team data")
                 return False
+            
+            # Expand player data if requested
+            if expand:
+                print("🔍 Expanding player data with detailed statistics...")
+                team_data = await self._expand_player_data(team_data)
             
             # Display extracted data
             if terminal_output:
@@ -469,9 +476,18 @@ class ExtractTeamAction(BaseAction):
         if team_data.get('players'):
             team_id = team_data.get('team_info', {}).get('team_id', 'Unknown')
             print(f"\n📊 TEAM PLAYERS - Team ID: {team_id} ({len(team_data['players'])} player(s)):")
-            print("-" * 140)
-            print(f"{'Player Name':<20} | {'Member ID':<10} | {'UserId':<10} | {'Skill Level':<11} | {'Matches Won/Played':<18} | {'Win %':<6} | {'PPM':<6} | {'PA':<6}")
-            print("-" * 140)
+            
+            # Check if we have expanded data
+            has_expanded_data = any(player.get('min_skill') is not None for player in team_data['players'])
+            
+            if has_expanded_data:
+                print("-" * 180)
+                print(f"{'Player Name':<20} | {'Member ID':<10} | {'UserId':<10} | {'Skill Level':<11} | {'Matches Won/Played':<18} | {'Win %':<6} | {'PPM':<6} | {'PA':<6} | {'Min Skill':<9} | {'Max Skill':<9} | {'Seasons':<7}")
+                print("-" * 180)
+            else:
+                print("-" * 140)
+                print(f"{'Player Name':<20} | {'Member ID':<10} | {'UserId':<10} | {'Skill Level':<11} | {'Matches Won/Played':<18} | {'Win %':<6} | {'PPM':<6} | {'PA':<6}")
+                print("-" * 140)
             
             for player in team_data['players']:
                 name = player.get('name', 'Unknown Player')[:19]
@@ -508,7 +524,15 @@ class ExtractTeamAction(BaseAction):
                 else:
                     pa = f"{pa_val}"[:5]
                 
-                print(f"{name:<20} | {member_id:<10} | {userid:<10} | {skill:<11} | {matches:<18} | {win_pct:<6} | {ppm:<6} | {pa:<6}")
+                if has_expanded_data:
+                    # Format expanded data
+                    min_skill = str(player.get('min_skill', 'N/A'))[:8]
+                    max_skill = str(player.get('max_skill', 'N/A'))[:8]
+                    seasons = str(player.get('seasons_played', 'N/A'))[:6]
+                    
+                    print(f"{name:<20} | {member_id:<10} | {userid:<10} | {skill:<11} | {matches:<18} | {win_pct:<6} | {ppm:<6} | {pa:<6} | {min_skill:<9} | {max_skill:<9} | {seasons:<7}")
+                else:
+                    print(f"{name:<20} | {member_id:<10} | {userid:<10} | {skill:<11} | {matches:<18} | {win_pct:<6} | {ppm:<6} | {pa:<6}")
         
         print("="*80)
     
@@ -579,6 +603,12 @@ class ExtractTeamAction(BaseAction):
                             writer.writerow([f'  Player {i} Win %', player.get('win_percentage', 'N/A')])
                             writer.writerow([f'  Player {i} PPM', player.get('ppm', 'N/A')])
                             writer.writerow([f'  Player {i} PA', player.get('pa', 'N/A')])
+                            
+                            # Add expanded data if available
+                            if player.get('min_skill') is not None:
+                                writer.writerow([f'  Player {i} Min Skill', player.get('min_skill', 'N/A')])
+                                writer.writerow([f'  Player {i} Max Skill', player.get('max_skill', 'N/A')])
+                                writer.writerow([f'  Player {i} Seasons Played', player.get('seasons_played', 'N/A')])
                     
                     writer.writerow(['URL', team_data.get('url', '')])
                     writer.writerow(['Extraction Time', team_data.get('extraction_timestamp', '')])
@@ -592,6 +622,55 @@ class ExtractTeamAction(BaseAction):
             print(f"❌ Error saving team data: {e}")
             return False
     
+    async def _expand_player_data(self, team_data):
+        """Expand player data with detailed statistics by visiting each player's page"""
+        try:
+            if not team_data.get('players'):
+                return team_data
+            
+            print(f"   📊 Processing {len(team_data['players'])} players for detailed statistics...")
+            
+            # Create team data extractor instance
+            team_extractor = TeamDataExtractor(self.session_manager)
+            
+            for i, player in enumerate(team_data['players'], 1):
+                userid = player.get('userid')
+                if not userid:
+                    print(f"   ⚠️  Player {i}: No UserId found, skipping expansion")
+                    continue
+                
+                print(f"   🔍 Player {i}/{len(team_data['players'])}: {player.get('name', 'Unknown')} (UserId: {userid})")
+                
+                try:
+                    # Use the common team data extractor
+                    player_stats = await team_extractor.extract_player_team_history(userid, self.league)
+                    
+                    if player_stats:
+                        # Add the expanded data to the player
+                        player.update(player_stats)
+                        print(f"   ✅ Expanded data: Min Skill: {player_stats.get('min_skill', 'N/A')}, Max Skill: {player_stats.get('max_skill', 'N/A')}, Seasons: {player_stats.get('seasons_played', 'N/A')}")
+                    else:
+                        print(f"   ⚠️  No team history found for {player.get('name', 'Unknown')}")
+                        # Set default values
+                        player['min_skill'] = 'N/A'
+                        player['max_skill'] = 'N/A'
+                        player['seasons_played'] = 'N/A'
+                
+                except Exception as e:
+                    print(f"   ❌ Error processing {player.get('name', 'Unknown')}: {e}")
+                    # Set default values on error
+                    player['min_skill'] = 'N/A'
+                    player['max_skill'] = 'N/A'
+                    player['seasons_played'] = 'N/A'
+            
+            print("   ✅ Player data expansion completed")
+            return team_data
+            
+        except Exception as e:
+            print(f"❌ Error expanding player data: {e}")
+            return team_data
+
+
     def _get_timestamp(self):
         """Get current timestamp"""
         from datetime import datetime

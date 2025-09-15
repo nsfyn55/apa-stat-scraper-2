@@ -148,6 +148,11 @@ Examples:
         action='store_true',
         help='Suppress terminal output (useful when only saving to file)'
     )
+    extract_team_parser.add_argument(
+        '--expand',
+        action='store_true',
+        help='Expand player data with detailed statistics (min_rank, max_rank, seasons_played)'
+    )
     
     args = parser.parse_args()
     
@@ -184,7 +189,8 @@ Examples:
                 output_file=args.output,
                 format=args.format,
                 headless=not args.launch_browser,
-                terminal_output=not args.no_terminal
+                terminal_output=not args.no_terminal,
+                expand=args.expand
             )
         else:
             print(f"❌ Unknown action: {args.action}")

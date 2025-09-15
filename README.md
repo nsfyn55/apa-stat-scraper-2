@@ -46,6 +46,7 @@ A powerful CLI application for extracting player statistics from the APA (Americ
 - **🖥️ Headless by Default**: Runs in headless mode by default for better performance and automation
 - **👤 Player Extraction**: Extract individual player statistics and information from player pages
 - **📊 Team Extraction**: Extract team statistics and player data from team pages
+- **🔄 Retry Logic**: Automatic retry mechanism for timeout errors and network issues
 - **💾 Data Export**: Export statistics to CSV and JSON formats
 - **📈 Analytics Ready**: Structured data perfect for analysis and visualization
 - **🔒 LSB Compliant**: Follows Linux Standard Base standards for configuration and state
@@ -174,12 +175,26 @@ apa-stat-scraper <action> --help
 
 **Description**: Establishes an authenticated session with the APA website. This action handles the complete login flow including form submission, authorization page navigation, and notification dismissal.
 
-**Semantics**: 
-- Prompts for credentials if not provided via command line
-- Performs multi-step authentication (login → authorization → dashboard)
-- Automatically handles notification dialogues
-- Saves session data for future use
-- Returns success/failure status
+**Features**:
+- Interactive credential prompting if not provided
+- Multi-step authentication flow (login → authorization → dashboard)
+- Automatic notification dialogue handling
+- Persistent session storage for future use
+- Headless operation by default for automation
+- Visual debugging mode available
+- Automatic retry logic for network issues
+
+**Options**:
+- `--email` (optional): Your APA website email address
+  - **Input**: Email string
+  - **Behavior**: Uses provided email for authentication, skips interactive prompt
+- `--password` (optional): Your APA website password
+  - **Input**: Password string
+  - **Behavior**: Uses provided password for authentication, skips interactive prompt
+- `--headless` (optional): Run in headless mode (default behavior)
+  - **Behavior**: Runs browser without visible window for automation
+- `--launch-browser` (optional): Launch browser in visible mode for debugging
+  - **Behavior**: Opens browser window to show login process, useful for debugging
 
 **Sample Commands**:
 ```bash
@@ -200,12 +215,19 @@ apa-stat-scraper login --help
 
 **Description**: Checks if the current session is valid and can access the APA dashboard. This action verifies authentication without requiring new credentials.
 
-**Semantics**:
+**Features**:
+- Non-destructive session verification
 - Uses existing session data from previous login
-- Navigates to dashboard to verify access
-- Handles any notification dialogues
-- Reports session status and current page information
-- Returns success if authenticated, failure if not
+- Dashboard access verification
+- Automatic notification dialogue handling
+- Detailed session status reporting
+- No credential input required
+
+**Options**:
+- `--headless` (optional): Run in headless mode (default behavior)
+  - **Behavior**: Runs browser without visible window, verifies session access
+- `--launch-browser` (optional): Launch browser in visible mode for debugging
+  - **Behavior**: Opens browser window to show session verification process
 
 **Sample Commands**:
 ```bash
@@ -223,13 +245,20 @@ apa-stat-scraper verify-session --help
 
 **Description**: Clears all browser data, logs, cache, and temporary files. This action resets the application to a clean state, requiring re-authentication.
 
-**Semantics**:
-- Removes browser session data (cookies, cache, local storage)
-- Clears application logs and cache
-- Deletes temporary files
-- Recreates necessary directory structure
-- Requires confirmation unless --confirm flag is used
-- Returns success/failure status
+**Features**:
+- Complete application state reset
+- Browser data cleanup (cookies, cache, local storage)
+- Application logs and cache clearing
+- Temporary file removal
+- Directory structure recreation
+- Interactive confirmation for safety
+- Non-destructive to configuration files
+
+**Options**:
+- `--confirm` (optional): Skip confirmation prompt and clear state immediately
+  - **Behavior**: Immediately clears all state data without asking for confirmation
+- No additional options available (confirmation required by default for safety)
+  - **Behavior**: Prompts user to confirm before clearing all state data
 
 **Sample Commands**:
 ```bash
@@ -245,22 +274,40 @@ apa-stat-scraper clear-state --help
 
 ### Extract Player
 
-**Description**: Extracts player statistics and information from a specific player's team page on the APA website. This action can be used with either a player URL or by providing a UserId directly. It navigates to the player page, automatically clicks on the Teams tab, and extracts available data including player name, team information, current teams, past teams (with automatic scrolling to load additional data), and statistics. Data is displayed in a clean tabular format in the terminal using standard Python libraries.
+**Description**: Extracts player statistics and information from a specific player's team page on the APA website. This action can be used with either a player URL or by providing a UserId directly. It navigates to the player page, automatically clicks on the Teams tab, and extracts available data including player name, team information, current teams, past teams (with automatic scrolling to load additional data), and statistics. Data is displayed in a clean tabular format in the terminal using standard Python libraries. The system includes robust retry logic to handle timeout errors and network issues automatically.
 
-**Semantics**:
-- Requires either a player URL or a UserId
-- Supports --league parameter to specify league (overrides config default)
-- If no arguments provided, will prompt for UserId interactively
-- Uses existing session data from previous login
-- Navigates to the specified player page
-- Automatically clicks on the Teams tab to load team content
-- Extracts player information, team details, current teams, and past teams
-- Automatically scrolls to load additional past teams data
-- Displays data in a formatted table in the terminal (can be suppressed with --no-terminal)
-- Shows detailed teams summary with current and past teams information
-- Handles any notification dialogues that appear
-- Can save extracted data to JSON or CSV format
-- Returns success/failure status with extracted data display
+**Features**:
+- Interactive UserId prompting if not provided
+- Support for both UserId and URL input methods
+- Automatic Teams tab navigation and content loading
+- Comprehensive player data extraction (current and past teams)
+- Automatic scrolling to load additional past teams data
+- Robust retry logic for timeout errors and network issues
+- Multiple output formats (terminal display, JSON, CSV)
+- League-specific data extraction
+- Session-based authentication (no re-login required)
+
+**Options**:
+- `--userid` (optional): Player's UserId for direct lookup
+  - **Input**: Numeric UserId string (e.g., "3287288")
+  - **Behavior**: Directly navigates to player page using UserId, skips interactive prompt
+- `--url` (optional): Full player URL for extraction
+  - **Input**: Complete URL string (e.g., "https://league.poolplayers.com/Philadelphia/member/3287288")
+  - **Behavior**: Parses URL to extract UserId and league, then processes player data
+- `--league` (optional): Override default league setting
+  - **Input**: League name string (e.g., "Philadelphia", "Los Angeles")
+  - **Behavior**: Uses specified league instead of config default, affects URL construction
+- `--output` (optional): Save extracted data to file
+  - **Input**: File path string (e.g., "player_data.json", "data.csv")
+  - **Behavior**: Saves data to specified file in addition to terminal display
+- `--format` (optional): Output format for saved data
+  - **Input**: Format string ("json" or "csv")
+  - **Behavior**: Controls how data is formatted when saved to file
+  - **Sample Output**: JSON format preserves all data structure, CSV format creates tabular data
+- `--no-terminal` (optional): Suppress terminal output
+  - **Behavior**: Hides formatted table output, useful for automated processing
+- `--launch-browser` (optional): Show browser window for debugging
+  - **Behavior**: Opens browser window to show data extraction process
 
 **Note**: The UserId is an internal identifier used by the APA system and does not reflect the player's skill level, team number, or any other visible player information. You can obtain UserIds for players by using the `extract-team` action, which displays the UserId for each team member.
 
@@ -290,19 +337,40 @@ apa-stat-scraper extract-player --help
 
 ### Extract Team
 
-**Description**: Extracts team statistics and player data from a specific team page on the APA website. This action navigates to the team page and extracts comprehensive team information including all team members with their statistics, skill levels, match records, and performance metrics. The data is displayed in a clean tabular format showing player names, member IDs, UserIds (for individual player lookups), skill levels, match records, win percentages, PPM (Points Per Match), and PA (Points Against) values.
+**Description**: Extracts team statistics and player data from a specific team page on the APA website. This action navigates to the team page and extracts comprehensive team information including all team members with their statistics, skill levels, match records, and performance metrics. The data is displayed in a clean tabular format showing player names, member IDs, UserIds (for individual player lookups), skill levels, match records, win percentages, PPM (Points Per Match), and PA (Points Against) values. The optional --expand parameter provides additional detailed statistics by recursively visiting each player's individual page to extract min_rank, max_rank, and seasons_played data. The system includes robust retry logic to handle timeout errors and network issues automatically.
 
-**Semantics**:
-- Requires a team ID to construct the team page URL
-- Supports --league parameter to specify league (overrides config default)
-- Uses existing session data from previous login
-- Navigates to the specified team page (https://league.poolplayers.com/team/{team_id})
-- Extracts team information and all player statistics from the team roster table
-- Displays data in a formatted table in the terminal (can be suppressed with --no-terminal)
-- Shows team ID in the header for easy reference
-- Handles any notification dialogues that appear
-- Can save extracted data to JSON or CSV format
-- Returns success/failure status with extracted team data display
+**Features**:
+- Comprehensive team roster extraction
+- Player statistics and performance metrics
+- Optional detailed player history expansion
+- Robust retry logic for timeout errors and network issues
+- Multiple output formats (terminal display, JSON, CSV)
+- League-specific team data extraction
+- Session-based authentication (no re-login required)
+- Automatic notification dialogue handling
+- Team ID reference in output headers
+
+**Options**:
+- `--team-id` (required): Team identifier for data extraction
+  - **Input**: Numeric team ID string (e.g., "12821920")
+  - **Behavior**: Constructs team page URL and extracts all player data from roster table
+- `--league` (optional): Override default league setting
+  - **Input**: League name string (e.g., "Philadelphia", "Los Angeles")
+  - **Behavior**: Uses specified league instead of config default, affects URL construction
+- `--expand` (optional): Extract detailed player statistics
+  - **Behavior**: Recursively visits each player's individual page to extract detailed statistics
+  - **Sample Output**: See "With --expand parameter" section below for enhanced table format
+- `--output` (optional): Save extracted data to file
+  - **Input**: File path string (e.g., "team_data.json", "roster.csv")
+  - **Behavior**: Saves data to specified file in addition to terminal display
+- `--format` (optional): Output format for saved data
+  - **Input**: Format string ("json" or "csv")
+  - **Behavior**: Controls how data is formatted when saved to file
+  - **Sample Output**: JSON format preserves all data structure, CSV format creates tabular data
+- `--no-terminal` (optional): Suppress terminal output
+  - **Behavior**: Hides formatted table output, useful for automated processing
+- `--launch-browser` (optional): Show browser window for debugging
+  - **Behavior**: Opens browser window to show team data extraction process
 
 **Sample Commands**:
 ```bash
@@ -311,6 +379,9 @@ apa-stat-scraper extract-team --team-id 12821920
 
 # Extract team data with specific league
 apa-stat-scraper extract-team --team-id 12821920 --league "Philadelphia"
+
+# Extract with expanded player statistics (min_rank, max_rank, seasons_played)
+apa-stat-scraper extract-team --team-id 12821920 --expand
 
 # Extract and save to JSON file (with terminal display)
 apa-stat-scraper extract-team --team-id 12821920 --output team_data.json
@@ -327,6 +398,8 @@ apa-stat-scraper extract-team --help
 
 **Output Format**:
 The extract-team action displays team data in a clean table format:
+
+**Standard Output:**
 ```
 📊 TEAM PLAYERS - Team ID: 12821920 (8 player(s)):
 ------------------------------------------------------------------------------------------------------------------------
@@ -334,6 +407,17 @@ Player Name          | Member ID  | UserId     | Skill Level | Matches Won/Playe
 ------------------------------------------------------------------------------------------------------------------------
 Art Carey            | 19100348   | 2762169    | 7           | 1/2                | 50.0%  | 9.0    | 45.0  
 Stephen McDonald     | 19162437   | 3287288    | 6           | 2/3                | 66.7%  | 8.3    | 41.7  
+...
+```
+
+**With --expand parameter:**
+```
+📊 TEAM PLAYERS - Team ID: 12821920 (8 player(s)):
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+Player Name          | Member ID  | UserId     | Skill Level | Matches Won/Played | Win %  | PPM    | PA     | Min Skill | Max Skill | Seasons
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+Art Carey            | 19100348   | 2762169    | 7           | 1/2                | 50.0%  | 9.0    | 45.0   | 6         | 7         | 3      
+Stephen McDonald     | 19162437   | 3287288    | 3           | 1/1                | 100.0  | 15.0   | 75.0   | 2         | 4         | 3      
 ...
 ```
 
@@ -409,7 +493,8 @@ apa-stat-scraper-2/
 │   ├── verify_session.py # Session verification action
 │   ├── clear_state.py    # Clear state action
 │   ├── extract_player.py # Extract player action
-│   └── extract_team.py   # Extract team action
+│   ├── extract_team.py   # Extract team action
+│   └── team_data_extractor.py # Common team data extraction logic
 ├── etc/                   # Configuration directory (LSB-compliant)
 │   └── apa-stat-scraper-2/
 │       └── config.json   # Application configuration
@@ -419,6 +504,9 @@ apa-stat-scraper-2/
 │       ├── logs/         # Application logs
 │       ├── cache/        # Application cache
 │       └── tmp/          # Temporary files
+├── utilities/             # Utility scripts
+│   ├── _apa-stat-scraper # Zsh completion script
+│   └── install-completion.sh # Completion installation script
 ├── requirements.txt       # Python dependencies
 ├── .python-version       # Python version specification
 ├── .gitignore            # Git ignore rules
@@ -451,6 +539,25 @@ Example configuration:
 ```
 
 Supported leagues include: Philadelphia, New York, Los Angeles, Chicago, Houston, Phoenix, San Antonio, San Diego, Dallas, San Jose, Austin, Jacksonville
+
+### Retry Logic
+
+The application includes robust retry logic to handle common network issues and timeout errors:
+
+- **Automatic Retries**: Up to 3 retry attempts for failed operations
+- **Timeout Detection**: Automatically detects and retries timeout errors
+- **Smart Delays**: Longer delays for timeout errors (3 seconds) vs other errors (2 seconds)
+- **Comprehensive Coverage**: Retries apply to:
+  - Player page navigation
+  - Teams tab clicking
+  - Team data extraction
+  - Empty data scenarios
+
+**Retry Behavior**:
+- Timeout errors: 3-second delay between retries
+- Other errors: 2-second delay between retries
+- Maximum 3 attempts per operation
+- Clear logging of retry attempts and final results
 ### Configuration Options
 
 Edit `etc/apa-stat-scraper-2/config.json` to customize:
@@ -590,11 +697,14 @@ ls -la var/apa-stat-scraper-2/logs/
 ### Phase 1: Core Scraping ✅
 - ✅ Team member statistics extraction
 - ✅ Player performance data collection
+- ✅ Robust retry logic for network issues
+- ✅ Team expansion with detailed player statistics
 - Match history scraping (coming soon)
 
 ### Phase 2: Data Export ✅
 - ✅ CSV export functionality
 - ✅ JSON export with structured data
+- ✅ Team data with expanded player statistics
 - Custom field selection (coming soon)
 
 ### Phase 3: Analytics
