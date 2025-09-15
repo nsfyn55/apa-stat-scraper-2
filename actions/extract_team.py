@@ -246,7 +246,7 @@ class ExtractTeamAction(BaseAction):
                 
             player_data = {}
             
-            # Cell 0: Player Name and Member ID
+            # Cell 0: Player Name, Member ID, and UserId from URL
             name_cell = await cells[0].text_content()
             if name_cell:
                 name_text = name_cell.strip()
@@ -262,6 +262,21 @@ class ExtractTeamAction(BaseAction):
                     name = name_text
                 
                 player_data['name'] = name
+                
+                # Extract UserId from the player's URL (if it's a link)
+                try:
+                    # Look for a link within the name cell
+                    link_element = await cells[0].query_selector('a')
+                    if link_element:
+                        href = await link_element.get_attribute('href')
+                        if href:
+                            # Extract UserId from URL pattern like /Philadelphia/member/3287288
+                            userid_match = re.search(r'/member/(\d+)', href)
+                            if userid_match:
+                                player_data['userid'] = userid_match.group(1)
+                except Exception as e:
+                    # If URL extraction fails, continue without userid
+                    pass
             
             # Cell 1: Skill Level
             skill_cell = await cells[1].text_content()
@@ -454,13 +469,14 @@ class ExtractTeamAction(BaseAction):
         if team_data.get('players'):
             team_id = team_data.get('team_info', {}).get('team_id', 'Unknown')
             print(f"\n📊 TEAM PLAYERS - Team ID: {team_id} ({len(team_data['players'])} player(s)):")
-            print("-" * 120)
-            print(f"{'Player Name':<20} | {'Member ID':<10} | {'Skill Level':<11} | {'Matches Won/Played':<18} | {'Win %':<6} | {'PPM':<6} | {'PA':<6}")
-            print("-" * 120)
+            print("-" * 140)
+            print(f"{'Player Name':<20} | {'Member ID':<10} | {'UserId':<10} | {'Skill Level':<11} | {'Matches Won/Played':<18} | {'Win %':<6} | {'PPM':<6} | {'PA':<6}")
+            print("-" * 140)
             
             for player in team_data['players']:
                 name = player.get('name', 'Unknown Player')[:19]
                 member_id = player.get('member_id', 'N/A')[:9]
+                userid = player.get('userid', 'N/A')[:9]
                 skill = str(player.get('skill_level', 'N/A'))[:10]
                 
                 # Format matches won/played
@@ -492,7 +508,7 @@ class ExtractTeamAction(BaseAction):
                 else:
                     pa = f"{pa_val}"[:5]
                 
-                print(f"{name:<20} | {member_id:<10} | {skill:<11} | {matches:<18} | {win_pct:<6} | {ppm:<6} | {pa:<6}")
+                print(f"{name:<20} | {member_id:<10} | {userid:<10} | {skill:<11} | {matches:<18} | {win_pct:<6} | {ppm:<6} | {pa:<6}")
         
         print("="*80)
     
@@ -513,6 +529,7 @@ class ExtractTeamAction(BaseAction):
             for i, player in enumerate(team_data['players'], 1):
                 name = player.get('name', 'Unknown Player')
                 member_id = player.get('member_id', 'N/A')
+                userid = player.get('userid', 'N/A')
                 skill = player.get('skill_level', 'N/A')
                 won = player.get('matches_won', 'N/A')
                 played = player.get('matches_played', 'N/A')
@@ -520,7 +537,7 @@ class ExtractTeamAction(BaseAction):
                 ppm = player.get('ppm', 'N/A')
                 pa = player.get('pa', 'N/A')
                 
-                print(f"   {i}. {name} (ID: {member_id}, Skill: {skill}, {won}/{played}, {win_pct}%, PPM: {ppm}, PA: {pa})")
+                print(f"   {i}. {name} (Member ID: {member_id}, UserId: {userid}, Skill: {skill}, {won}/{played}, {win_pct}%, PPM: {ppm}, PA: {pa})")
         
         print(f"\n🌐 URL: {team_data.get('url', 'N/A')}")
         print(f"⏰ Extracted: {team_data.get('extraction_timestamp', 'N/A')}")
@@ -555,6 +572,7 @@ class ExtractTeamAction(BaseAction):
                         for i, player in enumerate(team_data['players'], 1):
                             writer.writerow([f'  Player {i} Name', player.get('name', 'N/A')])
                             writer.writerow([f'  Player {i} Member ID', player.get('member_id', 'N/A')])
+                            writer.writerow([f'  Player {i} UserId', player.get('userid', 'N/A')])
                             writer.writerow([f'  Player {i} Skill Level', player.get('skill_level', 'N/A')])
                             writer.writerow([f'  Player {i} Matches Won', player.get('matches_won', 'N/A')])
                             writer.writerow([f'  Player {i} Matches Played', player.get('matches_played', 'N/A')])

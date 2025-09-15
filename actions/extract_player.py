@@ -13,7 +13,7 @@ from config import config
 class ExtractPlayerAction(BaseAction):
     """Action to extract player statistics from a specific player page"""
     
-    def run(self, team_id=None, member_id=None, player_url=None, output_file=None, format='json', headless=False, terminal_output=True, league=None):
+    def run(self, userid=None, player_url=None, output_file=None, format='json', headless=False, terminal_output=True, league=None):
         """Run the extract player action"""
         print("🚀 APA Stat Scraper - Extract Player")
         
@@ -23,36 +23,33 @@ class ExtractPlayerAction(BaseAction):
         self.league = self._determine_league(league)
         print("=" * 40)
         
-        # If URL is provided, extract team_id and member_id from it
+        # If URL is provided, extract userid from it
         if player_url:
-            team_id, member_id = self._extract_ids_from_url(player_url)
-            if not team_id or not member_id:
-                print("❌ Could not extract team ID and member ID from URL")
-                print("💡 Please provide team ID and member ID directly")
+            userid = self._extract_userid_from_url(player_url)
+            if not userid:
+                print("❌ Could not extract UserId from URL")
+                print("💡 Please provide UserId directly")
                 return False
         
-        # If no team_id or member_id provided, prompt for them
-        if not team_id:
-            team_id = input("Enter Team ID: ").strip()
-        if not member_id:
-            member_id = input("Enter Member ID: ").strip()
+        # If no userid provided, prompt for it
+        if not userid:
+            userid = input("Enter UserId: ").strip()
         
-        if not team_id or not member_id:
-            print("❌ Team ID and Member ID are required")
+        if not userid:
+            print("❌ UserId is required")
             return False
         
-        # Validate IDs are numeric
-        if not team_id.isdigit() or not member_id.isdigit():
-            print("❌ Team ID and Member ID must be numeric")
+        # Validate userid is numeric
+        if not userid.isdigit():
+            print("❌ UserId must be numeric")
             return False
         
-        # Construct URL from IDs
-        player_url = f"https://league.poolplayers.com/{self.league}/member/{member_id}/{team_id}/teams"
+        # Construct URL from userid
+        player_url = f"https://league.poolplayers.com/{self.league}/member/{userid}"
         print(f"📍 Player URL: {player_url}")
         
-        # Store team_id and member_id as instance variables
-        self.team_id = team_id
-        self.member_id = member_id
+        # Store userid as instance variable
+        self.userid = userid
         
         return self._run_with_session(
             player_url=player_url,
@@ -62,19 +59,34 @@ class ExtractPlayerAction(BaseAction):
             terminal_output=terminal_output
         )
     
-    def _extract_ids_from_url(self, url):
-        """Extract team_id and member_id from a player URL"""
-        pattern = r'https://league\.poolplayers\.com/[^/]+/member/(\d+)/(\d+)/teams'
-        match = re.match(pattern, url)
+    def _extract_userid_from_url(self, url):
+        """Extract userid from a player URL"""
+        # Handle both old format with team_id and new format with just userid
+        pattern_old = r'https://league\.poolplayers\.com/[^/]+/member/(\d+)/(\d+)/teams'
+        pattern_new = r'https://league\.poolplayers\.com/[^/]+/member/(\d+)'
+        
+        # Try new format first (just userid)
+        match = re.match(pattern_new, url)
         if match:
-            member_id = match.group(1)
-            team_id = match.group(2)
-            return team_id, member_id
-        return None, None
+            return match.group(1)
+        
+        # Try old format (userid/team_id/teams) - extract the userid part
+        match = re.match(pattern_old, url)
+        if match:
+            return match.group(1)  # Return the userid (first number)
+        
+        return None
     
     def _validate_url(self, url):
         """Validate URL format"""
-        return url.startswith("https://league.poolplayers.com/")
+        if not url.startswith("https://league.poolplayers.com/"):
+            return False
+        
+        # Check if it matches either the new format (just userid) or old format (userid/team_id/teams)
+        pattern_new = r'https://league\.poolplayers\.com/[^/]+/member/\d+'
+        pattern_old = r'https://league\.poolplayers\.com/[^/]+/member/\d+/\d+/teams'
+        
+        return bool(re.match(pattern_new, url) or re.match(pattern_old, url))
     def _determine_league(self, cli_league=None):
         """Determine which league to use based on priority: CLI > config > default"""
         # Priority 1: CLI parameter
@@ -195,6 +207,12 @@ class ExtractPlayerAction(BaseAction):
             stats = await self._extract_statistics()
             if stats:
                 player_data['statistics'].update(stats)
+            
+            # Navigate to Teams tab before extracting teams information
+            print("🏆 Navigating to Teams tab...")
+            teams_tab_clicked = await self._click_teams_tab()
+            if not teams_tab_clicked:
+                print("⚠️  Could not click Teams tab, proceeding with current content...")
             
             # Extract teams information (current and past)
             print("🏆 Extracting teams information...")
@@ -648,7 +666,7 @@ class ExtractPlayerAction(BaseAction):
                     team_data['win_percentage'] = round(win_pct, 1)
             
             # Use the team ID from command line arguments
-            team_data['team_id'] = self.team_id
+            team_data['team_id'] = self.userid
             team_data['status'] = 'current'
             
             return team_data if team_data.get('name') else None
@@ -788,7 +806,7 @@ class ExtractPlayerAction(BaseAction):
                 
                 
                 # Use the team ID from the command line arguments
-                team_data['team_id'] = self.team_id
+                team_data['team_id'] = self.userid
                 print(f"   ✅ Using team ID: {team_data['team_id']}")
             else:
                 # Fallback parsing if no season pattern found
@@ -1258,6 +1276,73 @@ class ExtractPlayerAction(BaseAction):
             print(f"❌ Error saving player data: {e}")
             return False
     
+    async def _click_teams_tab(self):
+        """Click on the Teams tab to load team content"""
+        try:
+            # Wait a moment for the page to fully load
+            await self.session_manager.page.wait_for_timeout(1000)
+            
+            # Look for the Teams tab - try multiple possible selectors
+            teams_tab_selectors = [
+                'button[data-tab="teams"]',
+                'a[data-tab="teams"]',
+                'button:has-text("Teams")',
+                'a:has-text("Teams")',
+                '[role="tab"]:has-text("Teams")',
+                '.tab:has-text("Teams")',
+                'button[aria-label*="Teams"]',
+                'a[aria-label*="Teams"]'
+            ]
+            
+            for selector in teams_tab_selectors:
+                try:
+                    element = await self.session_manager.page.query_selector(selector)
+                    if element:
+                        # Check if it's already active
+                        is_active = await element.get_attribute('aria-selected')
+                        if is_active == 'true':
+                            print("   ✅ Teams tab is already active")
+                            return True
+                        
+                        # Click the tab
+                        await element.click()
+                        print("   ✅ Clicked Teams tab")
+                        
+                        # Wait for content to load
+                        await self.session_manager.page.wait_for_timeout(2000)
+                        await self.session_manager.page.wait_for_load_state('networkidle')
+                        
+                        return True
+                except Exception as e:
+                    continue
+            
+            # If no specific Teams tab found, try to find any tab containing "Teams"
+            try:
+                # Look for any element containing "Teams" text that might be clickable
+                teams_elements = await self.session_manager.page.query_selector_all('*')
+                for element in teams_elements:
+                    try:
+                        text = await element.text_content()
+                        if text and 'Teams' in text and len(text.strip()) < 20:  # Short text likely to be a tab
+                            tag_name = await element.evaluate('el => el.tagName')
+                            if tag_name.lower() in ['button', 'a', 'div', 'span']:
+                                await element.click()
+                                print("   ✅ Clicked Teams element")
+                                await self.session_manager.page.wait_for_timeout(2000)
+                                await self.session_manager.page.wait_for_load_state('networkidle')
+                                return True
+                    except:
+                        continue
+            except:
+                pass
+            
+            print("   ⚠️  Could not find Teams tab")
+            return False
+            
+        except Exception as e:
+            print(f"   ⚠️  Error clicking Teams tab: {e}")
+            return False
+
     def _get_timestamp(self):
         """Get current timestamp"""
         from datetime import datetime

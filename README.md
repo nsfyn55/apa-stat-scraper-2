@@ -141,7 +141,7 @@ apa-stat-scraper <TAB>
 
 # Complete extract-player options
 apa-stat-scraper extract-player <TAB>
-# Shows: --team-id  --member-id  --url  --output  --format  --headless  --no-terminal
+# Shows: --userid  --url  --output  --format  --headless  --no-terminal
 
 # Complete format options
 apa-stat-scraper extract-player --format <TAB>
@@ -244,14 +244,15 @@ apa-stat-scraper clear-state --help
 
 ### Extract Player
 
-**Description**: Extracts player statistics and information from a specific player's team page on the APA website. This action can be used with either a player URL or by providing team ID and member ID directly. It navigates to the player page and extracts available data including player name, team information, current teams, past teams (with automatic scrolling to load additional data), and statistics. Data is displayed in a clean tabular format in the terminal using standard Python libraries.
+**Description**: Extracts player statistics and information from a specific player's team page on the APA website. This action can be used with either a player URL or by providing a UserId directly. It navigates to the player page, automatically clicks on the Teams tab, and extracts available data including player name, team information, current teams, past teams (with automatic scrolling to load additional data), and statistics. Data is displayed in a clean tabular format in the terminal using standard Python libraries.
 
 **Semantics**:
-- Requires either a player URL or both team ID and member ID
+- Requires either a player URL or a UserId
 - Supports --league parameter to specify league (overrides config default)
-- If no arguments provided, will prompt for team ID and member ID interactively
+- If no arguments provided, will prompt for UserId interactively
 - Uses existing session data from previous login
 - Navigates to the specified player page
+- Automatically clicks on the Teams tab to load team content
 - Extracts player information, team details, current teams, and past teams
 - Automatically scrolls to load additional past teams data
 - Displays data in a formatted table in the terminal (can be suppressed with --no-terminal)
@@ -260,25 +261,27 @@ apa-stat-scraper clear-state --help
 - Can save extracted data to JSON or CSV format
 - Returns success/failure status with extracted data display
 
+**Note**: The UserId is an internal identifier used by the APA system and does not reflect the player's skill level, team number, or any other visible player information. You can obtain UserIds for players by using the `extract-team` action, which displays the UserId for each team member.
+
 **Sample Commands**:
 ```bash
-# Interactive mode - will prompt for team ID and member ID
+# Interactive mode - will prompt for UserId
 apa-stat-scraper extract-player
 
-# Using team ID and member ID directly
-apa-stat-scraper extract-player --team-id 2336878 --member-id 2762169 --league "New York"
+# Using UserId directly
+apa-stat-scraper extract-player --userid 3287288 --league "Philadelphia"
 
-# Using URL (legacy method)
-apa-stat-scraper extract-player --url "https://league.poolplayers.com/Philadelphia/member/2762169/2336878/teams"
+# Using URL (supports both new and legacy formats)
+apa-stat-scraper extract-player --url "https://league.poolplayers.com/Philadelphia/member/3287288"
 
 # Extract and save to JSON file (with terminal display)
-apa-stat-scraper extract-player --team-id 2336878 --member-id 2762169 --league "Philadelphia" --output player_data.json
+apa-stat-scraper extract-player --userid 3287288 --league "Philadelphia" --output player_data.json
 
 # Extract and save to CSV file (suppress terminal output)
-apa-stat-scraper extract-player --team-id 2336878 --member-id 2762169 --league "Los Angeles" --output player_data.csv --format csv --no-terminal
+apa-stat-scraper extract-player --userid 3287288 --league "Los Angeles" --output player_data.csv --format csv --no-terminal
 
 # Extract in headless mode
-apa-stat-scraper extract-player --team-id 2336878 --member-id 2762169 --league "Chicago" --headless
+apa-stat-scraper extract-player --userid 3287288 --league "Chicago" --headless
 
 # Get help for extract-player action
 apa-stat-scraper extract-player --help
@@ -286,7 +289,7 @@ apa-stat-scraper extract-player --help
 
 ### Extract Team
 
-**Description**: Extracts team statistics and player data from a specific team page on the APA website. This action navigates to the team page and extracts comprehensive team information including all team members with their statistics, skill levels, match records, and performance metrics. The data is displayed in a clean tabular format showing player names, member IDs, skill levels, match records, win percentages, PPM (Points Per Match), and PA (Points Against) values.
+**Description**: Extracts team statistics and player data from a specific team page on the APA website. This action navigates to the team page and extracts comprehensive team information including all team members with their statistics, skill levels, match records, and performance metrics. The data is displayed in a clean tabular format showing player names, member IDs, UserIds (for individual player lookups), skill levels, match records, win percentages, PPM (Points Per Match), and PA (Points Against) values.
 
 **Semantics**:
 - Requires a team ID to construct the team page URL
@@ -326,10 +329,10 @@ The extract-team action displays team data in a clean table format:
 ```
 📊 TEAM PLAYERS - Team ID: 12821920 (8 player(s)):
 ------------------------------------------------------------------------------------------------------------------------
-Player Name          | Member ID  | Skill Level | Matches Won/Played | Win %  | PPM    | PA    
+Player Name          | Member ID  | UserId     | Skill Level | Matches Won/Played | Win %  | PPM    | PA    
 ------------------------------------------------------------------------------------------------------------------------
-Art Carey            | 19100348   | 7           | 1/2                | 50.0%  | 9.0    | 45.0  
-Stephen McDonald     | 19162437   | 6           | 2/3                | 66.7%  | 8.3    | 41.7  
+Art Carey            | 19100348   | 2762169    | 7           | 1/2                | 50.0%  | 9.0    | 45.0  
+Stephen McDonald     | 19162437   | 3287288    | 6           | 2/3                | 66.7%  | 8.3    | 41.7  
 ...
 ```
 

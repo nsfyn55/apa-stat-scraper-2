@@ -22,8 +22,8 @@ Examples:
   apa-stat-scraper login                    # Login to APA site
   apa-stat-scraper verify-session          # Verify current session
   apa-stat-scraper clear-state             # Clear browser state and data
-  apa-stat-scraper extract-player --team-id 2336878 --member-id 2762169 --league "New York"
-  apa-stat-scraper extract-player --url "https://league.poolplayers.com/Philadelphia/member/2762169/2336878/teams"
+  apa-stat-scraper extract-player --userid 3287288 --league "Philadelphia"
+  apa-stat-scraper extract-player --url "https://league.poolplayers.com/Philadelphia/member/3287288"
   apa-stat-scraper extract-team --team-id 12821920 --league "Philadelphia"
         """
     )
@@ -80,18 +80,14 @@ Examples:
         'extract-player',
         help='Extract player statistics from a specific player page'
     )
-    # Make URL optional and add team/member ID options
+    # Make URL optional and add userid option
     extract_parser.add_argument(
         '--url',
-        help='URL of the player page to extract data from (optional if team-id and member-id provided)'
+        help='URL of the player page to extract data from (optional if userid provided)'
     )
     extract_parser.add_argument(
-        '--team-id',
-        help='Team ID of the player to extract data from'
-    )
-    extract_parser.add_argument(
-        '--member-id',
-        help='Member ID of the player to extract data from'
+        '--userid',
+        help='UserId of the player to extract data from'
     )
     extract_parser.add_argument(
         '--league',
@@ -172,9 +168,8 @@ Examples:
         elif args.action == 'extract-player':
             action = ExtractPlayerAction()
             success = action.run(
-                team_id=args.team_id,
+                userid=args.userid,
                 league=args.league,
-                member_id=args.member_id,
                 player_url=args.url,
                 output_file=args.output,
                 format=args.format,
