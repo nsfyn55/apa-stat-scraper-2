@@ -15,6 +15,7 @@ A powerful CLI application for extracting player statistics from the APA (Americ
   - [Verify Session](#verify-session)
   - [Clear State](#clear-state)
   - [Extract Player](#extract-player)
+  - [Extract Team](#extract-team)
 - [Development](#development)
   - [Installation](#installation)
     - [Prerequisites](#prerequisites)
@@ -43,7 +44,7 @@ A powerful CLI application for extracting player statistics from the APA (Americ
 - **⚡ CLI Interface**: Easy-to-use command-line interface with multiple actions
 - **📦 Binary Installation**: Install as a system binary for easy access from anywhere
 - **👤 Player Extraction**: Extract individual player statistics and information from player pages
-- **📊 Team Scraping**: Extract player statistics from team pages (coming soon)
+- **📊 Team Extraction**: Extract team statistics and player data from team pages
 - **💾 Data Export**: Export statistics to CSV and JSON formats
 - **📈 Analytics Ready**: Structured data perfect for analysis and visualization
 - **🔒 LSB Compliant**: Follows Linux Standard Base standards for configuration and state
@@ -70,8 +71,10 @@ apa-stat-scraper login
 apa-stat-scraper verify-session
 
 # Extract player data (interactive mode)
-# Or use the binary directly after installation
 apa-stat-scraper extract-player
+
+# Extract team data
+apa-stat-scraper extract-team --team-id 12821920
 ```
 
 ## Installation
@@ -134,7 +137,7 @@ Then you can use tab completion:
 ```bash
 # Complete actions
 apa-stat-scraper <TAB>
-# Shows: login  verify-session  clear-state  extract-player
+# Shows: login  verify-session  clear-state  extract-player  extract-team
 
 # Complete extract-player options
 apa-stat-scraper extract-player <TAB>
@@ -281,6 +284,55 @@ apa-stat-scraper extract-player --team-id 2336878 --member-id 2762169 --league "
 apa-stat-scraper extract-player --help
 ```
 
+### Extract Team
+
+**Description**: Extracts team statistics and player data from a specific team page on the APA website. This action navigates to the team page and extracts comprehensive team information including all team members with their statistics, skill levels, match records, and performance metrics. The data is displayed in a clean tabular format showing player names, member IDs, skill levels, match records, win percentages, PPM (Points Per Match), and PA (Points Against) values.
+
+**Semantics**:
+- Requires a team ID to construct the team page URL
+- Supports --league parameter to specify league (overrides config default)
+- Uses existing session data from previous login
+- Navigates to the specified team page (https://league.poolplayers.com/team/{team_id})
+- Extracts team information and all player statistics from the team roster table
+- Displays data in a formatted table in the terminal (can be suppressed with --no-terminal)
+- Shows team ID in the header for easy reference
+- Handles any notification dialogues that appear
+- Can save extracted data to JSON or CSV format
+- Returns success/failure status with extracted team data display
+
+**Sample Commands**:
+```bash
+# Extract team data with team ID
+apa-stat-scraper extract-team --team-id 12821920
+
+# Extract team data with specific league
+apa-stat-scraper extract-team --team-id 12821920 --league "Philadelphia"
+
+# Extract and save to JSON file (with terminal display)
+apa-stat-scraper extract-team --team-id 12821920 --output team_data.json
+
+# Extract and save to CSV file (suppress terminal output)
+apa-stat-scraper extract-team --team-id 12821920 --output team_data.csv --format csv --no-terminal
+
+# Extract in headless mode
+apa-stat-scraper extract-team --team-id 12821920 --headless
+
+# Get help for extract-team action
+apa-stat-scraper extract-team --help
+```
+
+**Output Format**:
+The extract-team action displays team data in a clean table format:
+```
+📊 TEAM PLAYERS - Team ID: 12821920 (8 player(s)):
+------------------------------------------------------------------------------------------------------------------------
+Player Name          | Member ID  | Skill Level | Matches Won/Played | Win %  | PPM    | PA    
+------------------------------------------------------------------------------------------------------------------------
+Art Carey            | 19100348   | 7           | 1/2                | 50.0%  | 9.0    | 45.0  
+Stephen McDonald     | 19162437   | 6           | 2/3                | 66.7%  | 8.3    | 41.7  
+...
+```
+
 ## Development
 
 ### Installation
@@ -350,7 +402,10 @@ apa-stat-scraper-2/
 │   ├── __init__.py
 │   ├── base.py           # Base action class
 │   ├── login.py          # Login action
-│   └── verify_session.py # Session verification action
+│   ├── verify_session.py # Session verification action
+│   ├── clear_state.py    # Clear state action
+│   ├── extract_player.py # Extract player action
+│   └── extract_team.py   # Extract team action
 ├── etc/                   # Configuration directory (LSB-compliant)
 │   └── apa-stat-scraper-2/
 │       └── config.json   # Application configuration
@@ -528,15 +583,15 @@ ls -la var/apa-stat-scraper-2/logs/
 
 ## Future Roadmap
 
-### Phase 1: Core Scraping (Coming Soon)
-- Team member statistics extraction
-- Player performance data collection
-- Match history scraping
+### Phase 1: Core Scraping ✅
+- ✅ Team member statistics extraction
+- ✅ Player performance data collection
+- Match history scraping (coming soon)
 
-### Phase 2: Data Export
-- CSV export functionality
-- JSON export with structured data
-- Custom field selection
+### Phase 2: Data Export ✅
+- ✅ CSV export functionality
+- ✅ JSON export with structured data
+- Custom field selection (coming soon)
 
 ### Phase 3: Analytics
 - Player performance analysis

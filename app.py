@@ -10,6 +10,7 @@ from actions.login import LoginAction
 from actions.verify_session import VerifySessionAction
 from actions.clear_state import ClearStateAction
 from actions.extract_player import ExtractPlayerAction
+from actions.extract_team import ExtractTeamAction
 
 def main():
     """Main CLI entry point"""
@@ -23,6 +24,7 @@ Examples:
   apa-stat-scraper clear-state             # Clear browser state and data
   apa-stat-scraper extract-player --team-id 2336878 --member-id 2762169 --league "New York"
   apa-stat-scraper extract-player --url "https://league.poolplayers.com/Philadelphia/member/2762169/2336878/teams"
+  apa-stat-scraper extract-team --team-id 12821920 --league "Philadelphia"
         """
     )
     
@@ -116,6 +118,41 @@ Examples:
         help='Suppress terminal output (useful when only saving to file)'
     )
     
+    # Extract team action
+    extract_team_parser = subparsers.add_parser(
+        'extract-team',
+        help='Extract team statistics from a specific team page'
+    )
+    extract_team_parser.add_argument(
+        '--team-id',
+        required=True,
+        help='Team ID of the team to extract data from'
+    )
+    extract_team_parser.add_argument(
+        '--league',
+        help='League name to use (overrides config default)'
+    )
+    extract_team_parser.add_argument(
+        '--output',
+        help='Output file to save extracted data (optional)'
+    )
+    extract_team_parser.add_argument(
+        '--format',
+        choices=['json', 'csv'],
+        default='json',
+        help='Output format (default: json)'
+    )
+    extract_team_parser.add_argument(
+        '--headless',
+        action='store_true',
+        help='Run browser in headless mode'
+    )
+    extract_team_parser.add_argument(
+        '--no-terminal',
+        action='store_true',
+        help='Suppress terminal output (useful when only saving to file)'
+    )
+    
     args = parser.parse_args()
     
     try:
@@ -139,6 +176,16 @@ Examples:
                 league=args.league,
                 member_id=args.member_id,
                 player_url=args.url,
+                output_file=args.output,
+                format=args.format,
+                headless=args.headless,
+                terminal_output=not args.no_terminal
+            )
+        elif args.action == 'extract-team':
+            action = ExtractTeamAction()
+            success = action.run(
+                team_id=args.team_id,
+                league=args.league,
                 output_file=args.output,
                 format=args.format,
                 headless=args.headless,
