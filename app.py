@@ -48,9 +48,9 @@ Examples:
         help='Password for login (will prompt if not provided)'
     )
     login_parser.add_argument(
-        '--headless',
+        '--launch-browser',
         action='store_true',
-        help='Run browser in headless mode'
+        help='Launch browser window (default: headless mode)'
     )
     
     # Verify session action
@@ -59,9 +59,9 @@ Examples:
         help='Verify current session can access dashboard'
     )
     verify_parser.add_argument(
-        '--headless',
+        '--launch-browser',
         action='store_true',
-        help='Run browser in headless mode'
+        help='Launch browser window (default: headless mode)'
     )
     
     # Clear state action
@@ -104,9 +104,9 @@ Examples:
         help='Output format (default: json)'
     )
     extract_parser.add_argument(
-        '--headless',
+        '--launch-browser',
         action='store_true',
-        help='Run browser in headless mode'
+        help='Launch browser window (default: headless mode)'
     )
     extract_parser.add_argument(
         '--no-terminal',
@@ -139,9 +139,9 @@ Examples:
         help='Output format (default: json)'
     )
     extract_team_parser.add_argument(
-        '--headless',
+        '--launch-browser',
         action='store_true',
-        help='Run browser in headless mode'
+        help='Launch browser window (default: headless mode)'
     )
     extract_team_parser.add_argument(
         '--no-terminal',
@@ -157,11 +157,11 @@ Examples:
             success = action.run(
                 email=args.email,
                 password=args.password,
-                headless=args.headless
+                headless=not args.launch_browser
             )
         elif args.action == 'verify-session':
             action = VerifySessionAction()
-            success = action.run(headless=args.headless)
+            success = action.run(headless=not args.launch_browser)
         elif args.action == 'clear-state':
             action = ClearStateAction()
             success = action.run(confirm=args.confirm)
@@ -173,7 +173,7 @@ Examples:
                 player_url=args.url,
                 output_file=args.output,
                 format=args.format,
-                headless=args.headless,
+                headless=not args.launch_browser,
                 terminal_output=not args.no_terminal
             )
         elif args.action == 'extract-team':
@@ -183,7 +183,7 @@ Examples:
                 league=args.league,
                 output_file=args.output,
                 format=args.format,
-                headless=args.headless,
+                headless=not args.launch_browser,
                 terminal_output=not args.no_terminal
             )
         else:

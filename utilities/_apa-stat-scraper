@@ -15,29 +15,42 @@ _apa_stat_scraper() {
                 'login[Authenticate with APA website]' \
                 'verify-session[Check if session is valid]' \
                 'clear-state[Clear stored session data]' \
-                'extract-player[Extract player statistics]'
+                'extract-player[Extract player statistics]' \
+                'extract-team[Extract team statistics]'
             ;;
         args)
             case $line[1] in
                 login)
                     _arguments \
-                        '--headless[Run browser in headless mode]'
+                        '--email[Email address for login]:email:' \
+                        '--password[Password for login]:password:' \
+                        '--launch-browser[Launch browser window (default: headless mode)]'
                     ;;
                 verify-session)
                     _arguments \
-                        '--headless[Run browser in headless mode]'
+                        '--launch-browser[Launch browser window (default: headless mode)]'
                     ;;
                 clear-state)
-                    # No additional arguments for clear-state
+                    _arguments \
+                        '--confirm[Skip confirmation prompt]'
                     ;;
                 extract-player)
                     _arguments \
-                        '--team-id[Team ID of the player]:team_id:' \
-                        '--member-id[Member ID of the player]:member_id:' \
+                        '--userid[UserId of the player]:userid:' \
                         '--url[URL of the player page]:url:_urls' \
+                        '--league[League name to use]:league:' \
                         '--output[Output file path]:file:_files -g "*.{json,csv}"' \
                         '--format[Output format]:format:(json csv)' \
-                        '--headless[Run browser in headless mode]' \
+                        '--launch-browser[Launch browser window (default: headless mode)]' \
+                        '--no-terminal[Suppress terminal output]'
+                    ;;
+                extract-team)
+                    _arguments \
+                        '--team-id[Team ID of the team]:team_id:' \
+                        '--league[League name to use]:league:' \
+                        '--output[Output file path]:file:_files -g "*.{json,csv}"' \
+                        '--format[Output format]:format:(json csv)' \
+                        '--launch-browser[Launch browser window (default: headless mode)]' \
                         '--no-terminal[Suppress terminal output]'
                     ;;
             esac

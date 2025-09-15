@@ -43,6 +43,7 @@ A powerful CLI application for extracting player statistics from the APA (Americ
 - **🔔 Notification Handling**: Automatically dismisses notification dialogues
 - **⚡ CLI Interface**: Easy-to-use command-line interface with multiple actions
 - **📦 Binary Installation**: Install as a system binary for easy access from anywhere
+- **🖥️ Headless by Default**: Runs in headless mode by default for better performance and automation
 - **👤 Player Extraction**: Extract individual player statistics and information from player pages
 - **📊 Team Extraction**: Extract team statistics and player data from team pages
 - **💾 Data Export**: Export statistics to CSV and JSON formats
@@ -141,7 +142,7 @@ apa-stat-scraper <TAB>
 
 # Complete extract-player options
 apa-stat-scraper extract-player <TAB>
-# Shows: --userid  --url  --output  --format  --headless  --no-terminal
+# Shows: --userid  --url  --output  --format  --launch-browser  --no-terminal
 
 # Complete format options
 apa-stat-scraper extract-player --format <TAB>
@@ -280,8 +281,8 @@ apa-stat-scraper extract-player --userid 3287288 --league "Philadelphia" --outpu
 # Extract and save to CSV file (suppress terminal output)
 apa-stat-scraper extract-player --userid 3287288 --league "Los Angeles" --output player_data.csv --format csv --no-terminal
 
-# Extract in headless mode
-apa-stat-scraper extract-player --userid 3287288 --league "Chicago" --headless
+# Extract with browser window visible
+apa-stat-scraper extract-player --userid 3287288 --league "Chicago" --launch-browser
 
 # Get help for extract-player action
 apa-stat-scraper extract-player --help
@@ -317,8 +318,8 @@ apa-stat-scraper extract-team --team-id 12821920 --output team_data.json
 # Extract and save to CSV file (suppress terminal output)
 apa-stat-scraper extract-team --team-id 12821920 --output team_data.csv --format csv --no-terminal
 
-# Extract in headless mode
-apa-stat-scraper extract-team --team-id 12821920 --headless
+# Extract with browser window visible
+apa-stat-scraper extract-team --team-id 12821920 --launch-browser
 
 # Get help for extract-team action
 apa-stat-scraper extract-team --help
