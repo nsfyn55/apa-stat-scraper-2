@@ -21,7 +21,7 @@ Examples:
   apa-stat-scraper login                    # Login to APA site
   apa-stat-scraper verify-session          # Verify current session
   apa-stat-scraper clear-state             # Clear browser state and data
-  apa-stat-scraper extract-player --team-id 2336878 --member-id 2762169
+  apa-stat-scraper extract-player --team-id 2336878 --member-id 2762169 --league "New York"
   apa-stat-scraper extract-player --url "https://league.poolplayers.com/Philadelphia/member/2762169/2336878/teams"
         """
     )
@@ -92,6 +92,10 @@ Examples:
         help='Member ID of the player to extract data from'
     )
     extract_parser.add_argument(
+        '--league',
+        help='League name to use (overrides config default)'
+    )
+    extract_parser.add_argument(
         '--output',
         help='Output file to save extracted data (optional)'
     )
@@ -132,6 +136,7 @@ Examples:
             action = ExtractPlayerAction()
             success = action.run(
                 team_id=args.team_id,
+                league=args.league,
                 member_id=args.member_id,
                 player_url=args.url,
                 output_file=args.output,

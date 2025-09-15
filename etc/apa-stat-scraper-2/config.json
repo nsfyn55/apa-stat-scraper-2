@@ -1,4 +1,7 @@
 {
+  "league": {
+    "default_league": "Philadelphia"
+  },
   "browser": {
     "headless": false,
     "timeout": 30000,

@@ -13,9 +13,14 @@ from config import config
 class ExtractPlayerAction(BaseAction):
     """Action to extract player statistics from a specific player page"""
     
-    def run(self, team_id=None, member_id=None, player_url=None, output_file=None, format='json', headless=False, terminal_output=True):
+    def run(self, team_id=None, member_id=None, player_url=None, output_file=None, format='json', headless=False, terminal_output=True, league=None):
         """Run the extract player action"""
         print("🚀 APA Stat Scraper - Extract Player")
+        
+        
+        # Determine league to use (CLI param > config > default)
+        
+        self.league = self._determine_league(league)
         print("=" * 40)
         
         # If URL is provided, extract team_id and member_id from it
@@ -42,7 +47,7 @@ class ExtractPlayerAction(BaseAction):
             return False
         
         # Construct URL from IDs
-        player_url = f"https://league.poolplayers.com/Philadelphia/member/{member_id}/{team_id}/teams"
+        player_url = f"https://league.poolplayers.com/{self.league}/member/{member_id}/{team_id}/teams"
         print(f"📍 Player URL: {player_url}")
         
         # Store team_id and member_id as instance variables
@@ -68,11 +73,32 @@ class ExtractPlayerAction(BaseAction):
         return None, None
     
     def _validate_url(self, url):
-        """Validate that the URL is a proper APA player page"""
+        """Validate URL format"""
+        return url.startswith("https://league.poolplayers.com/")
+    def _determine_league(self, cli_league=None):
+        """Determine which league to use based on priority: CLI > config > default"""
+        # Priority 1: CLI parameter
+        if cli_league:
+            print(f"   🏆 Using league from CLI: {cli_league}")
+            return cli_league
+        
+        # Priority 2: Configuration file (if available)
+        try:
+            from config import Config
+            config = Config()
+            if hasattr(config, "league") and hasattr(config.league, "default_league"):
+                print(f"   ⚙️  Using league from config: {config.league.default_league}")
+                return config.league.default_league
+        except Exception as e:
+            print(f"   ⚠️  Could not load league from config: {e}")
+        
+        # Priority 3: Default fallback
+        print("   🏠 Using default league: Philadelphia")
+        return "Philadelphia"
         pattern = r'https://league\.poolplayers\.com/[^/]+/member/\d+/\d+/teams'
         return bool(re.match(pattern, url))
     
-    async def _run_async(self, player_url, output_file=None, format='json', headless=False, terminal_output=True):
+    async def _run_async(self, player_url, output_file=None, format='json', headless=False, terminal_output=True, league=None):
         """Async implementation of player extraction"""
         try:
             # Start browser

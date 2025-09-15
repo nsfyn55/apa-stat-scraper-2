@@ -245,6 +245,7 @@ apa-stat-scraper clear-state --help
 
 **Semantics**:
 - Requires either a player URL or both team ID and member ID
+- Supports --league parameter to specify league (overrides config default)
 - If no arguments provided, will prompt for team ID and member ID interactively
 - Uses existing session data from previous login
 - Navigates to the specified player page
@@ -262,19 +263,19 @@ apa-stat-scraper clear-state --help
 apa-stat-scraper extract-player
 
 # Using team ID and member ID directly
-apa-stat-scraper extract-player --team-id 2336878 --member-id 2762169
+apa-stat-scraper extract-player --team-id 2336878 --member-id 2762169 --league "New York"
 
 # Using URL (legacy method)
 apa-stat-scraper extract-player --url "https://league.poolplayers.com/Philadelphia/member/2762169/2336878/teams"
 
 # Extract and save to JSON file (with terminal display)
-apa-stat-scraper extract-player --team-id 2336878 --member-id 2762169 --output player_data.json
+apa-stat-scraper extract-player --team-id 2336878 --member-id 2762169 --league "Philadelphia" --output player_data.json
 
 # Extract and save to CSV file (suppress terminal output)
-apa-stat-scraper extract-player --team-id 2336878 --member-id 2762169 --output player_data.csv --format csv --no-terminal
+apa-stat-scraper extract-player --team-id 2336878 --member-id 2762169 --league "Los Angeles" --output player_data.csv --format csv --no-terminal
 
 # Extract in headless mode
-apa-stat-scraper extract-player --team-id 2336878 --member-id 2762169 --headless
+apa-stat-scraper extract-player --team-id 2336878 --member-id 2762169 --league "Chicago" --headless
 
 # Get help for extract-player action
 apa-stat-scraper extract-player --help
@@ -373,6 +374,24 @@ The application follows LSB (Linux Standard Base) standards for configuration an
 - **State Data**: Stored in `var/apa-stat-scraper-2/` (browser data, logs, cache, temp files)
 - **Logs**: Stored in `var/apa-stat-scraper-2/logs/` with automatic rotation
 
+### League Configuration
+
+The application supports configurable league selection for player data extraction:
+
+- **Default League**: Set in `etc/apa-stat-scraper-2/config.json` under `league.default_league`
+- **CLI Override**: Use `--league` parameter to override config default
+- **Priority**: CLI parameter > config default > "Philadelphia" fallback
+
+Example configuration:
+```json
+{
+  "league": {
+    "default_league": "Philadelphia"
+  }
+}
+```
+
+Supported leagues include: Philadelphia, New York, Los Angeles, Chicago, Houston, Phoenix, San Antonio, San Diego, Dallas, San Jose, Austin, Jacksonville
 ### Configuration Options
 
 Edit `etc/apa-stat-scraper-2/config.json` to customize:
