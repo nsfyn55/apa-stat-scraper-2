@@ -11,6 +11,7 @@ from actions.verify_session import VerifySessionAction
 from actions.clear_state import ClearStateAction
 from actions.extract_player import ExtractPlayerAction
 from actions.extract_team import ExtractTeamAction
+from actions.cache_manage import CacheManageAction, create_parser as create_cache_manage_parser
 
 def main():
     """Main CLI entry point"""
@@ -25,6 +26,8 @@ Examples:
   apa-stat-scraper extract-player --userid 3287288 --league "Philadelphia"
   apa-stat-scraper extract-player --url "https://league.poolplayers.com/Philadelphia/member/3287288"
   apa-stat-scraper extract-team --team-id 12821920 --league "Philadelphia"
+  apa-stat-scraper cache-manage stats      # View cache statistics
+  apa-stat-scraper cache-manage clear --all # Clear all cache files
         """
     )
     
@@ -113,6 +116,11 @@ Examples:
         action='store_true',
         help='Suppress terminal output (useful when only saving to file)'
     )
+    extract_parser.add_argument(
+        '--no-cache',
+        action='store_true',
+        help='Skip cache and force fresh data extraction'
+    )
     
     # Extract team action
     extract_team_parser = subparsers.add_parser(
@@ -153,6 +161,14 @@ Examples:
         action='store_true',
         help='Expand player data with detailed statistics (min_rank, max_rank, seasons_played)'
     )
+    extract_team_parser.add_argument(
+        '--no-cache',
+        action='store_true',
+        help='Skip cache and force fresh data extraction'
+    )
+    
+    # Cache manage action
+    create_cache_manage_parser(subparsers)
     
     args = parser.parse_args()
     
@@ -179,7 +195,8 @@ Examples:
                 output_file=args.output,
                 format=args.format,
                 headless=not args.launch_browser,
-                terminal_output=not args.no_terminal
+                terminal_output=not args.no_terminal,
+                no_cache=args.no_cache
             )
         elif args.action == 'extract-team':
             action = ExtractTeamAction()
@@ -190,8 +207,14 @@ Examples:
                 format=args.format,
                 headless=not args.launch_browser,
                 terminal_output=not args.no_terminal,
-                expand=args.expand
+                expand=args.expand,
+                no_cache=args.no_cache
             )
+        elif args.action == 'cache-manage':
+            # The cache-manage subparser should have already parsed the subcommand
+            # The subcommand should be in args.action after the cache-manage parser runs
+            action = CacheManageAction()
+            return action.run(args)
         else:
             print(f"❌ Unknown action: {args.action}")
             return 1
